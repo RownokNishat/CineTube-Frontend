@@ -28,7 +28,7 @@ export interface IDoctor {
     averageRating: number;
     createdAt: Date;
     user : {
-        status : UserStatus
+        status? : UserStatus
     };
     specialties : Array<{
         specialtyId : string;
@@ -85,7 +85,7 @@ export interface IDoctorUserDetails {
     email?: string;
     name?: string;
     role?: string;
-    status?: string;
+    status?: UserStatus;
     emailVerified?: boolean;
     image?: string;
     isDeleted?: boolean;

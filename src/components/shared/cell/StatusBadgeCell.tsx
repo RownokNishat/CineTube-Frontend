@@ -2,10 +2,11 @@ import { Badge } from "@/components/ui/badge";
 import { UserStatus } from "@/types/doctor.types";
 
 interface IStatusBadgeCellProps {
-    status : UserStatus;
+    status : UserStatus | undefined;
 }
 
 const StatusBadgeCell = ({ status }: IStatusBadgeCellProps) => {
+  if (!status) return null;
   return (
     <Badge
     
