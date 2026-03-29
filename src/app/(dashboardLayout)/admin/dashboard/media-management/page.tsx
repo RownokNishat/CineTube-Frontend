@@ -7,6 +7,7 @@ import { Film, Plus } from "lucide-react";
 import Image from "next/image";
 import DeleteMediaButton from "./DeleteMediaButton";
 import AddMediaDialog from "./AddMediaDialog";
+import EditMediaDialog from "./EditMediaDialog";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +75,10 @@ export default async function MediaManagementPage({ searchParams }: MediaManagem
                                         <Badge variant={media.status === "PUBLISHED" ? "default" : "secondary"}>{media.status}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <DeleteMediaButton mediaId={media.id} title={media.title} />
+                                        <div className="flex items-center justify-end gap-1">
+                                            <EditMediaDialog media={media} />
+                                            <DeleteMediaButton mediaId={media.id} title={media.title} />
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
