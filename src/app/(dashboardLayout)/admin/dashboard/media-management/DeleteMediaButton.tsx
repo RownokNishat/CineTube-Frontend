@@ -1,10 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { deleteMedia } from "@/services/media.services";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { deleteMediaAction } from "./_action";
 
 interface DeleteMediaButtonProps {
     mediaId: string;
@@ -19,11 +19,13 @@ const DeleteMediaButton = ({ mediaId, title }: DeleteMediaButtonProps) => {
         if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
         setLoading(true);
         try {
-            await deleteMedia(mediaId);
+            const result = await deleteMediaAction(mediaId);
+            if (!result.success) {
+                toast.error(result.message || "Failed to delete media");
+                return;
+            }
             toast.success("Media deleted");
             router.refresh();
-        } catch {
-            toast.error("Failed to delete media");
         } finally {
             setLoading(false);
         }
