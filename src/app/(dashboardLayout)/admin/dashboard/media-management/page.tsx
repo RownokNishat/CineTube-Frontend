@@ -55,7 +55,7 @@ export default async function MediaManagementPage({ searchParams }: MediaManagem
                             {mediaList.map((media) => (
                                 <TableRow key={media.id}>
                                     <TableCell>
-                                        <div className="relative size-10 rounded overflow-hidden bg-muted">
+                                        <div className="relative w-10 h-14 rounded overflow-hidden bg-muted flex-shrink-0">
                                             {media.posterUrl ? (
                                                 <Image src={media.posterUrl} alt={media.title} fill className="object-cover" sizes="40px" />
                                             ) : (

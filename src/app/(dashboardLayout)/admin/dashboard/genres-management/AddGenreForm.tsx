@@ -1,10 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createGenre } from "@/services/genre.services";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { createGenreAction } from "./_action";
 
 const AddGenreForm = () => {
     const [name, setName] = useState("");
@@ -16,12 +16,14 @@ const AddGenreForm = () => {
         if (!name.trim()) return;
         setLoading(true);
         try {
-            await createGenre(name.trim());
+            const result = await createGenreAction(name.trim());
+            if (!result.success) {
+                toast.error(result.message || "Failed to create genre");
+                return;
+            }
             toast.success(`Genre "${name}" created`);
             setName("");
             router.refresh();
-        } catch {
-            toast.error("Failed to create genre");
         } finally {
             setLoading(false);
         }
