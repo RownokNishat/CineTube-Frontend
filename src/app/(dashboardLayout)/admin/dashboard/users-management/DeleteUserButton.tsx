@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { deleteUser } from "@/services/user.services";
 import { Trash2 } from "lucide-react";
+import { deleteUserAction } from "./_action";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,11 +14,13 @@ const DeleteUserButton = ({ userId, name }: { userId: string; name: string }) =>
         if (!confirm(`Delete user "${name}"?`)) return;
         setLoading(true);
         try {
-            await deleteUser(userId);
+            const result = await deleteUserAction(userId);
+            if (!result.success) {
+                toast.error(result.message || "Failed to delete user");
+                return;
+            }
             toast.success("User deleted");
             router.refresh();
-        } catch {
-            toast.error("Failed to delete user");
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,6 @@
 "use client";
+import { addToWatchlistAction, removeFromWatchlistAction } from "@/app/_actions/watchlist.actions";
 import { Button } from "@/components/ui/button";
-import { addToWatchlist, removeFromWatchlist } from "@/services/watchlist.services";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,17 +22,15 @@ const WatchlistButton = ({ mediaId, isInWatchlist: initial, isLoggedIn }: Watchl
         }
         setLoading(true);
         try {
-            if (inWatchlist) {
-                await removeFromWatchlist(mediaId);
-                setInWatchlist(false);
-                toast.success("Removed from watchlist");
+            const result = inWatchlist
+                ? await removeFromWatchlistAction(mediaId)
+                : await addToWatchlistAction(mediaId);
+            if (!result.success) {
+                toast.error(result.message || "Failed to update watchlist");
             } else {
-                await addToWatchlist(mediaId);
-                setInWatchlist(true);
-                toast.success("Added to watchlist");
+                setInWatchlist(!inWatchlist);
+                toast.success(inWatchlist ? "Removed from watchlist" : "Added to watchlist");
             }
-        } catch {
-            toast.error("Failed to update watchlist");
         } finally {
             setLoading(false);
         }

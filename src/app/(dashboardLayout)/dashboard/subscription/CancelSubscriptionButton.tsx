@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { cancelSubscription } from "@/services/subscription.services";
 import { useRouter } from "next/navigation";
+import { cancelSubscriptionAction } from "./_action";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,11 +13,13 @@ const CancelSubscriptionButton = () => {
         if (!confirm("Are you sure you want to cancel your subscription?")) return;
         setLoading(true);
         try {
-            await cancelSubscription();
+            const result = await cancelSubscriptionAction();
+            if (!result.success) {
+                toast.error(result.message || "Failed to cancel subscription");
+                return;
+            }
             toast.success("Subscription cancelled");
             router.refresh();
-        } catch {
-            toast.error("Failed to cancel subscription");
         } finally {
             setLoading(false);
         }

@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { createCommentAction, createReviewAction, getCommentsAction, toggleReviewLikeAction } from "@/app/_actions/review.actions";
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createComment, getComments } from "@/services/comment.services";
-import { createReview, toggleReviewLike } from "@/services/review.services";
 import { Comment, Review } from "@/types/review.types";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageCircle, Star } from "lucide-react";
@@ -35,7 +34,8 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
     const handleLike = async () => {
         if (!userId) { toast.error("Please login to like reviews"); return; }
         try {
-            await toggleReviewLike(review.id);
+            const result = await toggleReviewLikeAction(review.id);
+            if (!result.success) { toast.error(result.message || "Failed to toggle like"); return; }
             setLiked((v) => !v);
             setLikes((v) => liked ? v - 1 : v + 1);
         } catch {
@@ -47,8 +47,9 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
         if (comments.length > 0) { setShowComments((v) => !v); return; }
         setLoadingComments(true);
         try {
-            const res = await getComments({ reviewId: review.id });
-            setComments(res.data ?? []);
+            const result = await getCommentsAction(review.id);
+            setComments(result.success ? (result.data ?? []) : []);
+            if (!result.success) toast.error(result.message || "Failed to load comments");
             setShowComments(true);
         } catch {
             toast.error("Failed to load comments");
@@ -63,8 +64,9 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
         if (!userId) { toast.error("Please login to comment"); return; }
         setSubmittingComment(true);
         try {
-            const res = await createComment({ reviewId: review.id, content: commentText });
-            setComments((prev) => [...prev, res.data]);
+            const result = await createCommentAction({ reviewId: review.id, content: commentText });
+            if (!result.success) { toast.error(result.message || "Failed to add comment"); return; }
+            setComments((prev) => [...prev, result.data]);
             setCommentText("");
             toast.success("Comment added");
         } catch {
@@ -176,8 +178,9 @@ const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId }: ReviewSe
         setError(null);
         try {
             const tagList = tags.split(",").map((t) => t.trim()).filter(Boolean);
-            const res = await createReview({ mediaId, rating, content, isSpoiler, tags: tagList });
-            setReviews((prev) => [res.data, ...prev]);
+            const result = await createReviewAction({ mediaId, rating, content, isSpoiler, tags: tagList });
+            if (!result.success) { setError(result.message || "Failed to submit review"); return; }
+            setReviews((prev) => [result.data, ...prev]);
             setContent("");
             setTags("");
             setIsSpoiler(false);

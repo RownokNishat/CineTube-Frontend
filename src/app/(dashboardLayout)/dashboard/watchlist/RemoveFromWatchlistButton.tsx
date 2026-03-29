@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { removeFromWatchlist } from "@/services/watchlist.services";
 import { Trash2 } from "lucide-react";
+import { removeFromWatchlistAction } from "@/app/_actions/watchlist.actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,11 +13,13 @@ const RemoveFromWatchlistButton = ({ mediaId }: { mediaId: string }) => {
     const handleRemove = async () => {
         setLoading(true);
         try {
-            await removeFromWatchlist(mediaId);
+            const result = await removeFromWatchlistAction(mediaId);
+            if (!result.success) {
+                toast.error(result.message || "Failed to remove from watchlist");
+                return;
+            }
             toast.success("Removed from watchlist");
             router.refresh();
-        } catch {
-            toast.error("Failed to remove from watchlist");
         } finally {
             setLoading(false);
         }

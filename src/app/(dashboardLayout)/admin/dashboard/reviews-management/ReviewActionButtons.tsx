@@ -1,10 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { updateReview, deleteReview } from "@/services/review.services";
 import { CheckCircle, Trash2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { deleteReviewAction, updateReviewAction } from "./_action";
 
 interface ReviewActionButtonsProps {
     reviewId: string;
@@ -19,16 +19,16 @@ const ReviewActionButtons = ({ reviewId, currentStatus }: ReviewActionButtonsPro
         if (action === "delete" && !confirm("Delete this review permanently?")) return;
         setLoading(true);
         try {
-            if (action === "delete") {
-                await deleteReview(reviewId);
-                toast.success("Review deleted");
+            const result = action === "delete"
+                ? await deleteReviewAction(reviewId)
+                : await updateReviewAction(reviewId, { status: action === "publish" ? "PUBLISHED" : "UNPUBLISHED" });
+
+            if (!result.success) {
+                toast.error(result.message || "Action failed");
             } else {
-                await updateReview(reviewId, { status: action === "publish" ? "PUBLISHED" : "UNPUBLISHED" });
-                toast.success(`Review ${action === "publish" ? "published" : "unpublished"}`);
+                toast.success(action === "delete" ? "Review deleted" : `Review ${action === "publish" ? "published" : "unpublished"}`);
+                router.refresh();
             }
-            router.refresh();
-        } catch {
-            toast.error("Action failed");
         } finally {
             setLoading(false);
         }
