@@ -1,8 +1,11 @@
+import ForgotPasswordForm from "@/components/modules/Auth/ForgotPasswordForm";
 
 const ForgotPasswordPage = () => {
-  return (
-    <div>ForgotPasswordPage</div>
-  )
-}
+    return (
+        <div className="min-h-screen flex items-center justify-center px-4 py-12">
+            <ForgotPasswordForm />
+        </div>
+    );
+};
 
-export default ForgotPasswordPage
+export default ForgotPasswordPage;

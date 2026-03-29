@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
 import { Bell, Calendar, CheckCircle, Clock, UserPlus } from "lucide-react";
+import { useState } from "react";
 
 interface Notification {
     id: string;
@@ -16,42 +17,12 @@ interface Notification {
     read : boolean;
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-    {
-        id: "1",
-        title: "New Appointment Scheduled",
-        message: "You have a new appointment scheduled with John Doe on 2024-06-15 at 10:00 AM.",
-        type : "appointment",
-        timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-        read : false
-    },
-
-    {
-        id: "2",
-        title: "Schedule Updated",
-        message: "Your schedule has been updated for the week of 2024-06-17.",
-        type : "schedule",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-        read : true
-    },
-
-    {
-        id: "3",
-        title: "System Maintenance",
-        message: "The system will undergo maintenance on 2024-06-20 from 1:00 AM to 3:00 AM.",
-        type : "system",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-        read : false
-    },
-
-    {
-        id: "4",
-        title: "New User Registered",
-        message: "A new user, Jane Smith, has registered on the platform.",
-        type : "user",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
-        read : true
-    }
+// Offsets in ms — timestamps are computed inside the component to avoid hydration mismatch
+const NOTIFICATION_OFFSETS = [
+    { id: "1", title: "New Appointment Scheduled", message: "You have a new appointment scheduled with John Doe on 2024-06-15 at 10:00 AM.", type: "appointment" as const, offsetMs: 1000 * 60 * 30, read: false },
+    { id: "2", title: "Schedule Updated", message: "Your schedule has been updated for the week of 2024-06-17.", type: "schedule" as const, offsetMs: 1000 * 60 * 60, read: true },
+    { id: "3", title: "System Maintenance", message: "The system will undergo maintenance on 2024-06-20 from 1:00 AM to 3:00 AM.", type: "system" as const, offsetMs: 1000 * 60 * 60 * 24, read: false },
+    { id: "4", title: "New User Registered", message: "A new user, Jane Smith, has registered on the platform.", type: "user" as const, offsetMs: 1000 * 60 * 60 * 48, read: true },
 ]
 
 const getNotificationIcon = (type : Notification["type"]) => {
@@ -72,8 +43,15 @@ const getNotificationIcon = (type : Notification["type"]) => {
 
 
 const NotificationDropdown = () => {
+    // Lazy initializer runs only on the client, preventing SSR/client timestamp mismatch
+    const [notifications] = useState<Notification[]>(() =>
+        NOTIFICATION_OFFSETS.map(({ offsetMs, ...rest }) => ({
+            ...rest,
+            timestamp: new Date(Date.now() - offsetMs),
+        }))
+    );
 
-    const unreadCount = MOCK_NOTIFICATIONS.filter(notification => !notification.read).length;
+    const unreadCount = notifications.filter(notification => !notification.read).length;
   return (
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -105,8 +83,8 @@ const NotificationDropdown = () => {
 
             <ScrollArea className="h-75">
                 {
-                    MOCK_NOTIFICATIONS.length > 0 ? (
-                        MOCK_NOTIFICATIONS.map(notification => (
+                    notifications.length > 0 ? (
+                        notifications.map(notification => (
                             <DropdownMenuItem key={notification.id} className="flex flex-col items-start gap-2 p-3 cursor-pointer">
                                 <div className="mt-0.5">
                                     {getNotificationIcon(notification.type)}
@@ -128,7 +106,7 @@ const NotificationDropdown = () => {
                                         {notification.message}
                                     </p>
 
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                                         {formatDistanceToNow(notification.timestamp, {
                                             addSuffix: true
                                         })}

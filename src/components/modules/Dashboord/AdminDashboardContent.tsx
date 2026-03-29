@@ -15,8 +15,8 @@ const AdminDashboardContent = () => {
     refetchOnWindowFocus: "always", // Refetch the data when the window regains focus
   });
 
-  const { data } = adminDashboardData as ApiResponse<IAdminDashboardData>;
-  //http://localhost:5000/api/v1/doctors?page=1&limit=2&searchTerm=ortho&appointmentFee[gt]=1000&appointmentFee[lte]=1500&fields=name,email&sortBy=user.name.firstName&sortOrder=asc&experience[gt]=7&include=specialties&user.role=DOCTOR&specialties.specialty.title=Neurology&gender=MALE&specialties.specialty.title=Cardiology2
+  const data = (adminDashboardData as ApiResponse<IAdminDashboardData> | undefined)?.data;
+
   return (
     <div>
       <StatsCard

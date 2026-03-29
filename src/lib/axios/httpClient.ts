@@ -2,7 +2,6 @@
 import { getNewTokensWithRefreshToken } from '@/services/auth.services';
 import { ApiResponse } from '@/types/api.types';
 import axios from 'axios';
-import { cookies, headers } from 'next/headers';
 import { isTokenExpiringSoon } from '../tokenUtils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -20,6 +19,7 @@ async function tryRefreshToken(
         return;
     }
 
+    const { headers } = await import('next/headers');
     const requestHeader = await headers();
 
     if (requestHeader.get("x-token-refreshed") === "1") {
@@ -34,6 +34,18 @@ async function tryRefreshToken(
 }
 
 const axiosInstance = async () => {
+    // Browser environment: cookies are sent automatically by the browser
+    if (typeof window !== 'undefined') {
+        return axios.create({
+            baseURL: API_BASE_URL,
+            timeout: 30000,
+            headers: { 'Content-Type': 'application/json' },
+            withCredentials: true,
+        });
+    }
+
+    // Server environment: manually forward cookies from the incoming request
+    const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
     const refreshToken = cookieStore.get("refreshToken")?.value;

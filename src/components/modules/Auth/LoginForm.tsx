@@ -43,6 +43,10 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                     return ;
                 }
             } catch (error : any) {
+                // NEXT_REDIRECT is thrown by redirect() on success — let Next.js handle it
+                if (error?.digest?.startsWith("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
+                    throw error;
+                }
                 console.log(`Login failed: ${error.message}`);
                 setServerError(`Login failed: ${error.message}`);
             }

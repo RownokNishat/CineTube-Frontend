@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PH Healthcare Management System",
-  description: "A comprehensive healthcare management system built with Next.js, TypeScript, and Tailwind CSS. This application provides features for managing patient records, appointments, billing, and more, ensuring efficient healthcare administration.",
+    title: "CineTube — Movie & Series Rating Portal",
+    description: "Discover, rate, and review movies and TV series. Browse thousands of titles, write reviews, manage your watchlist, and subscribe for premium content.",
 };
 
 export default function RootLayout({
