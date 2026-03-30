@@ -1,6 +1,6 @@
 "use server"
 
-import { adminResetPassword, changeMyPassword } from "@/services/auth.services"
+import { adminResetPassword, changeMyPassword } from "@/services/account.services"
 import { type ApiErrorResponse, type ApiResponse } from "@/types/api.types"
 import { IChangePasswordPayload, changePasswordZodSchema } from "@/zod/auth.validation"
 
