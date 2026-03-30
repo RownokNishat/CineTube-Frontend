@@ -1,11 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { getMediaReviewStats, getReviews } from "@/services/review.services";
+import { getMediaList } from "@/services/media.services";
 import { Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import ReviewActionButtons from "./ReviewActionButtons";
 import { type ReviewStats } from "@/types/review.types";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -21,10 +24,23 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
     let reviews: Awaited<ReturnType<typeof getReviews>>["data"] = [];
     let total = 0;
     let stats: ReviewStats | null = null;
+    let mediaCatalog: Awaited<ReturnType<typeof getMediaList>>["data"] = [];
+
+    if (!mediaId) {
+        try {
+            const mediaRes = await getMediaList({ limit: 50, sortBy: "createdAt", sortOrder: "desc" });
+            mediaCatalog = mediaRes.data ?? [];
+        } catch {
+            mediaCatalog = [];
+        }
+    }
+
     try {
-        const res = await getReviews({ mediaId, page, limit: 20, sortBy: "createdAt", sortOrder: "desc" });
-        reviews = res.data ?? [];
-        total = res.meta?.total ?? 0;
+        if (mediaId) {
+            const res = await getReviews({ mediaId, page, limit: 20, sortBy: "createdAt", sortOrder: "desc" });
+            reviews = res.data ?? [];
+            total = res.meta?.total ?? 0;
+        }
     } catch { /* empty */ }
 
     if (mediaId) {
@@ -40,10 +56,38 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2"><Star className="size-6" /> Reviews Management</h1>
-                <p className="text-muted-foreground">{total} total reviews</p>
+                <p className="text-muted-foreground">{mediaId ? `${total} total reviews` : "Select a media title to moderate reviews"}</p>
             </div>
 
-            {stats && (
+            {!mediaId && (
+                <Card>
+                    <CardContent className="p-4">
+                        {mediaCatalog.length > 0 ? (
+                            <div className="space-y-2">
+                                {mediaCatalog.map((media) => (
+                                    <div key={media.id} className="flex items-center justify-between rounded-md border px-3 py-2">
+                                        <div>
+                                            <p className="font-medium">{media.title}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {media.releaseYear} • {media.mediaType}
+                                            </p>
+                                        </div>
+                                        <Button asChild size="sm" variant="outline">
+                                            <Link href={`/admin/dashboard/reviews-management?mediaId=${media.id}`}>
+                                                Manage Reviews
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">No media found.</p>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
+
+            {mediaId && stats && (
                 <Card>
                     <CardContent className="grid grid-cols-1 gap-4 p-4 md:grid-cols-3">
                         <div>
@@ -62,6 +106,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                 </Card>
             )}
 
+            {mediaId && (
             <Card>
                 <CardContent className="p-0">
                     <Table>
@@ -115,6 +160,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                     </Table>
                 </CardContent>
             </Card>
+            )}
         </div>
     );
 }

@@ -40,7 +40,12 @@ export default function WatchlistPage() {
         }
     }
 
-    const handleRemoveItem = async (mediaId: string, title: string) => {
+    const handleRemoveItem = async (mediaId: string | undefined, title: string) => {
+        if (!mediaId) {
+            toast.error("Missing media id for this watchlist item")
+            return
+        }
+
         try {
             setRemoving(mediaId)
             const result = await removeFromWatchlist(mediaId)
@@ -134,7 +139,7 @@ export default function WatchlistPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {watchlist.map((item) => (
                             <div key={item.id} className="group">
-                                <Link href={`/media/${item.mediaId}`}>
+                                <Link href={item.mediaId || item.media?.id ? `/media/${item.mediaId || item.media?.id}` : "/media"}>
                                     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
                                         <div className="relative aspect-[2/3] bg-muted overflow-hidden">
                                             {item.media.posterUrl ? (
@@ -155,9 +160,9 @@ export default function WatchlistPage() {
                                             <button
                                                 onClick={(e) => {
                                                     e.preventDefault()
-                                                    handleRemoveItem(item.mediaId, item.media.title)
+                                                    handleRemoveItem(item.mediaId || item.media?.id, item.media.title)
                                                 }}
-                                                disabled={removing === item.mediaId}
+                                                disabled={removing === (item.mediaId || item.media?.id)}
                                                 className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
                                                 title="Remove from watchlist"
                                             >

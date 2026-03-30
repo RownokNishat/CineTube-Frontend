@@ -7,15 +7,29 @@ export async function getWatchlist(): Promise<ApiResponse<WatchlistItem[]>> {
 }
 
 export async function addToWatchlist(mediaId: string): Promise<ApiResponse<WatchlistItem>> {
-    return httpClient.post<WatchlistItem>(`/watchlist/${mediaId}`, {});
+    try {
+        return await httpClient.post<WatchlistItem>(`/watchlist/${mediaId}`, {});
+    } catch {
+        // Compatibility fallback for backends that expect mediaId in body.
+        return httpClient.post<WatchlistItem>("/watchlist", { mediaId });
+    }
 }
 
 export async function removeFromWatchlist(mediaId: string): Promise<ApiResponse<null>> {
-    return httpClient.delete<null>(`/watchlist/${mediaId}`);
+    try {
+        return await httpClient.delete<null>(`/watchlist/${mediaId}`);
+    } catch {
+        // Compatibility fallback for handlers expecting mediaId as query.
+        return httpClient.delete<null>("/watchlist", { params: { mediaId } });
+    }
 }
 
 export async function checkWatchlistStatus(mediaId: string): Promise<ApiResponse<{ inWatchlist: boolean }>> {
-    return httpClient.get<{ inWatchlist: boolean }>(`/watchlist/${mediaId}/status`);
+    try {
+        return await httpClient.get<{ inWatchlist: boolean }>(`/watchlist/${mediaId}/status`);
+    } catch {
+        return httpClient.get<{ inWatchlist: boolean }>("/watchlist/status", { params: { mediaId } });
+    }
 }
 
 export async function clearWatchlist(): Promise<ApiResponse<null>> {

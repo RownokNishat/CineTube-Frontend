@@ -29,6 +29,18 @@ export default async function WatchlistPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {watchlist.map((item) => (
                         <Card key={item.id} className="overflow-hidden group">
+                            {(() => {
+                                const targetMediaId = item.mediaId || item.media?.id;
+                                if (!targetMediaId) {
+                                    return (
+                                        <CardContent className="p-3">
+                                            <p className="text-sm text-muted-foreground">Media reference unavailable for this watchlist item.</p>
+                                        </CardContent>
+                                    );
+                                }
+
+                                return (
+                                    <>
                             <div className="relative aspect-[2/3] overflow-hidden bg-muted">
                                 {item.media?.posterUrl ? (
                                     <Image src={item.media.posterUrl} alt={item.media.title} fill className="object-cover group-hover:scale-105 transition-transform" sizes="300px" />
@@ -39,7 +51,7 @@ export default async function WatchlistPage() {
                                 )}
                             </div>
                             <CardContent className="p-3 space-y-2">
-                                <Link href={`/media/${item.mediaId}`} className="font-semibold text-sm line-clamp-1 hover:text-primary">{item.media?.title}</Link>
+                                <Link href={`/media/${targetMediaId}`} className="font-semibold text-sm line-clamp-1 hover:text-primary">{item.media?.title}</Link>
                                 <div className="flex items-center justify-between">
                                     <div className="flex gap-1 flex-wrap">
                                         <Badge variant="outline" className="text-xs">{item.media?.mediaType}</Badge>
@@ -49,8 +61,11 @@ export default async function WatchlistPage() {
                                     </div>
                                     <span className="text-xs text-muted-foreground">{item.media?.releaseYear}</span>
                                 </div>
-                                <RemoveFromWatchlistButton mediaId={item.mediaId} />
+                                <RemoveFromWatchlistButton mediaId={targetMediaId} />
                             </CardContent>
+                                    </>
+                                );
+                            })()}
                         </Card>
                     ))}
                 </div>
