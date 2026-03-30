@@ -26,14 +26,24 @@ export const createMediaCheckoutSessionAction = async (
     mediaId: string
 ): Promise<ApiResponse<{ checkoutUrl: string; sessionId: string }> | ApiErrorResponse> => {
     try {
-        const accessRes = await getUserMediaAccess(mediaId)
-        if (accessRes.success && accessRes.data.hasAccess) {
-            return { success: false, message: "You already purchased this premium title." }
-        }
-
         return await createMediaCheckoutSession(mediaId)
     } catch (error: unknown) {
-        return { success: false, message: getActionErrorMessage(error, "Failed to create checkout session") }
+        const statusCode =
+            error &&
+            typeof error === "object" &&
+            "response" in error &&
+            error.response &&
+            typeof error.response === "object" &&
+            "status" in error.response &&
+            typeof error.response.status === "number"
+                ? error.response.status
+                : undefined
+
+        return {
+            success: false,
+            message: getActionErrorMessage(error, "Failed to create checkout session"),
+            statusCode,
+        }
     }
 }
 

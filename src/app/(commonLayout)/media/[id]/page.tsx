@@ -40,15 +40,16 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
             isInWatchlist = (watchlistRes.data ?? []).some((item) => item.mediaId === id);
         } catch { /* ignore */ }
 
-        // Check if user has access to premium media
-        if (media.pricingType === "PREMIUM") {
-            try {
-                const accessRes = await getUserMediaAccess(id);
-                if (accessRes.success && "data" in accessRes) {
-                    hasMediaAccess = accessRes.data.hasAccess;
-                }
-            } catch { /* ignore */ }
-        }
+    }
+
+    // Check if user has access to premium media independent of user-info request.
+    if (media.pricingType === "PREMIUM") {
+        try {
+            const accessRes = await getUserMediaAccess(id);
+            if (accessRes.success && "data" in accessRes) {
+                hasMediaAccess = accessRes.data.hasAccess;
+            }
+        } catch { /* ignore */ }
     }
 
     const avgRating = media.averageRating ?? (reviews.length > 0
@@ -59,8 +60,8 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
         <div className="max-w-7xl mx-auto px-4 py-8">
             {/* Hero */}
             <div className="flex flex-col md:flex-row gap-8 mb-10">
-                <div className="flex-shrink-0">
-                    <div className="relative w-48 md:w-64 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl">
+                <div className="shrink-0">
+                    <div className="relative aspect-2/3 w-48 overflow-hidden rounded-xl shadow-2xl md:w-64">
                         {media.posterUrl ? (
                             <Image src={media.posterUrl} alt={media.title} fill className="object-cover" sizes="256px" />
                         ) : (

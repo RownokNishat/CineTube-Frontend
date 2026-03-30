@@ -40,3 +40,9 @@ export async function getUserMediaAccess(mediaId: string): Promise<ApiResponse<{
 export async function getPurchasedMedia(): Promise<ApiResponse<Media[]>> {
     return httpClient.get<Media[]>("/media/purchases/my-purchases");
 }
+
+export async function verifyMediaPurchase(sessionId: string): Promise<ApiResponse<{ hasAccess: boolean; mediaId?: string; reason?: string }>> {
+    return httpClient.get<{ hasAccess: boolean; mediaId?: string; reason?: string }>("/media/purchases/verify", {
+        params: { sessionId },
+    });
+}

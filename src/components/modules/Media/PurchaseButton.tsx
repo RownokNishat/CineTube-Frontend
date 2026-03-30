@@ -43,22 +43,16 @@ export default function PurchaseButton({ mediaId, mediaTitle, isLoggedIn, price 
             const result = await createMediaCheckoutSessionAction(mediaId)
 
             if (!result.success || !("data" in result)) {
-                const message = result.message || "Failed to start purchase"
-                const normalized = message.toLowerCase()
+                setShowConfirm(false)
 
-                if (
-                    normalized.includes("already purchased") ||
-                    normalized.includes("unique constraint") ||
-                    normalized.includes("userid") && normalized.includes("mediaid")
-                ) {
-                    setError("You already purchased this premium title. Reloading access status...")
-                    setShowConfirm(false)
+                // 409 = backend confirmed user already completed this purchase
+                if (result.statusCode === 409) {
+                    setError("Payment already confirmed. Reloading access status...")
                     router.refresh()
                     return
                 }
 
-                setError(message)
-                setShowConfirm(false)
+                setError(result.message || "Failed to start purchase")
                 return
             }
 
