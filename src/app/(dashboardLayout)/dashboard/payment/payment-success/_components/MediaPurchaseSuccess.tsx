@@ -9,8 +9,8 @@ import { verifyMediaPurchase } from "@/services/media.services"
 
 type VerifyState = "polling" | "confirmed" | "failed"
 
-const MAX_ATTEMPTS = 8
-const POLL_INTERVAL_MS = 2500
+const MAX_ATTEMPTS = 5
+const POLL_INTERVAL_MS = 1500
 
 interface MediaPurchaseSuccessProps {
     sessionId: string
@@ -20,6 +20,7 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
     const router = useRouter()
     const [state, setState] = useState<VerifyState>("polling")
     const [mediaId, setMediaId] = useState<string | null>(null)
+    const [errorText, setErrorText] = useState<string>("")
     const attemptsRef = useRef(0)
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -28,9 +29,14 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
             const result = await verifyMediaPurchase(sessionId)
 
             if (result.success && result.data.hasAccess) {
+                const resolvedMediaId =
+                    result.data.mediaId ||
+                    result.data.purchase?.media?.id ||
+                    null
+
                 setState("confirmed")
-                if (result.data.mediaId) {
-                    setMediaId(result.data.mediaId)
+                if (resolvedMediaId) {
+                    setMediaId(resolvedMediaId)
                 }
                 return
             }
@@ -40,6 +46,7 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
 
         attemptsRef.current += 1
         if (attemptsRef.current >= MAX_ATTEMPTS) {
+            setErrorText("Payment verification is taking longer than expected. Please try again.")
             setState("failed")
             return
         }
@@ -53,6 +60,12 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
             if (timerRef.current) clearTimeout(timerRef.current)
         }
     }, [verify])
+
+    useEffect(() => {
+        if (state === "confirmed" && mediaId) {
+            router.replace(`/media/${mediaId}?purchased=true&purchase_session=${encodeURIComponent(sessionId)}`)
+        }
+    }, [state, mediaId, router, sessionId])
 
     if (state === "polling") {
         return (
@@ -75,13 +88,13 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
                 <div className="space-y-2">
                     <h1 className="text-2xl font-bold">Purchase Confirmed!</h1>
                     <p className="text-muted-foreground">
-                        You now have permanent access to this premium title.
+                        Purchase verified. Redirecting you to the media page...
                     </p>
                 </div>
                 <div className="flex gap-3">
                     {mediaId && (
                         <Button asChild>
-                            <Link href={`/media/${mediaId}?purchase_session=${encodeURIComponent(sessionId)}`}>Watch Now</Link>
+                            <Link href={`/media/${mediaId}?purchased=true&purchase_session=${encodeURIComponent(sessionId)}`}>Go Now</Link>
                         </Button>
                     )}
                     <Button
@@ -108,12 +121,11 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
             <div className="space-y-2">
                 <h1 className="text-2xl font-bold">Verification Timed Out</h1>
                 <p className="text-muted-foreground">
-                    Your payment may still be processing. Check your email for a confirmation receipt.
-                    If payment was taken but you can&apos;t watch the content, please contact support.
+                    {errorText || "Your payment may still be processing. Please refresh and try again."}
                 </p>
             </div>
             <div className="flex gap-3">
-                <Button onClick={() => { attemptsRef.current = 0; setState("polling"); verify() }}>
+                <Button onClick={() => { attemptsRef.current = 0; setErrorText(""); setState("polling"); verify() }}>
                     Try Again
                 </Button>
                 <Button variant="outline" asChild>
