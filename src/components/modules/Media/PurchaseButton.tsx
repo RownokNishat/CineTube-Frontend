@@ -77,7 +77,7 @@ export default function PurchaseButton({ mediaId, mediaTitle, isLoggedIn, price 
         <>
             {error && (
                 <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
-                    <AlertCircle className="size-4 flex-shrink-0" />
+                    <AlertCircle className="size-4 shrink-0" />
                     <span>{error}</span>
                 </div>
             )}
@@ -96,7 +96,7 @@ export default function PurchaseButton({ mediaId, mediaTitle, isLoggedIn, price 
 
             <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
                 <AlertDialogContent>
-                    <AlertDialogTitle>Purchase "{mediaTitle}"?</AlertDialogTitle>
+                    <AlertDialogTitle>Purchase &quot;{mediaTitle}&quot;?</AlertDialogTitle>
                     <AlertDialogDescription>
                         You are about to purchase permanent access to watch this content. You will be redirected to Stripe to complete the payment securely.
                         <br />
