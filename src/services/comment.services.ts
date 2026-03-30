@@ -9,13 +9,26 @@ export interface CommentQueryParams {
 }
 
 export async function getComments(params: CommentQueryParams): Promise<ApiResponse<Comment[]>> {
-    return httpClient.get<Comment[]>("/comments", { params: params as unknown as Record<string, unknown> });
+    const { reviewId, ...rest } = params;
+    return httpClient.get<Comment[]>(`/reviews/${reviewId}/comments`, {
+        params: rest as Record<string, unknown>,
+    });
 }
 
 export async function createComment(payload: { reviewId: string; content: string; parentId?: string | null }): Promise<ApiResponse<Comment>> {
-    return httpClient.post<Comment>("/comments", payload);
+    const { reviewId, parentId, ...rest } = payload;
+
+    if (parentId) {
+        return httpClient.post<Comment>(`/reviews/comments/${parentId}/replies`, rest);
+    }
+
+    return httpClient.post<Comment>(`/reviews/${reviewId}/comments`, rest);
 }
 
-export async function toggleCommentLike(id: string): Promise<ApiResponse<{ liked: boolean }>> {
-    return httpClient.post<{ liked: boolean }>(`/comments/${id}/like`, {});
+export async function likeComment(id: string): Promise<ApiResponse<{ liked: boolean }>> {
+    return httpClient.post<{ liked: boolean }>(`/reviews/comments/${id}/like`, {});
+}
+
+export async function unlikeComment(id: string): Promise<ApiResponse<{ liked: boolean }>> {
+    return httpClient.delete<{ liked: boolean }>(`/reviews/comments/${id}/like`);
 }

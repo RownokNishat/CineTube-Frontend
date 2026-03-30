@@ -1,7 +1,7 @@
 "use server"
 
 import { getComments, createComment } from "@/services/comment.services"
-import { createReview, toggleReviewLike } from "@/services/review.services"
+import { createReview, likeReview, unlikeReview } from "@/services/review.services"
 import { type ApiErrorResponse, type ApiResponse } from "@/types/api.types"
 import { type Comment, type Review } from "@/types/review.types"
 
@@ -38,13 +38,23 @@ export const createReviewAction = async (payload: {
     }
 }
 
-export const toggleReviewLikeAction = async (
+export const likeReviewAction = async (
     reviewId: string
 ): Promise<ApiResponse<{ liked: boolean }> | ApiErrorResponse> => {
     try {
-        return await toggleReviewLike(reviewId)
+        return await likeReview(reviewId)
     } catch (error: unknown) {
-        return { success: false, message: getActionErrorMessage(error, "Failed to toggle like") }
+        return { success: false, message: getActionErrorMessage(error, "Failed to like review") }
+    }
+}
+
+export const unlikeReviewAction = async (
+    reviewId: string
+): Promise<ApiResponse<{ liked: boolean }> | ApiErrorResponse> => {
+    try {
+        return await unlikeReview(reviewId)
+    } catch (error: unknown) {
+        return { success: false, message: getActionErrorMessage(error, "Failed to unlike review") }
     }
 }
 

@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createCommentAction, createReviewAction, getCommentsAction, toggleReviewLikeAction } from "@/app/_actions/review.actions";
+import { createCommentAction, createReviewAction, getCommentsAction, likeReviewAction, unlikeReviewAction } from "@/app/_actions/review.actions";
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -34,12 +34,19 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
     const handleLike = async () => {
         if (!userId) { toast.error("Please login to like reviews"); return; }
         try {
-            const result = await toggleReviewLikeAction(review.id);
-            if (!result.success) { toast.error(result.message || "Failed to toggle like"); return; }
-            setLiked((v) => !v);
-            setLikes((v) => liked ? v - 1 : v + 1);
+            const result = liked
+                ? await unlikeReviewAction(review.id)
+                : await likeReviewAction(review.id);
+
+            if (!result.success) {
+                toast.error(result.message || `Failed to ${liked ? "unlike" : "like"} review`);
+                return;
+            }
+
+            setLiked(result.data.liked);
+            setLikes((v) => result.data.liked ? v + 1 : Math.max(0, v - 1));
         } catch {
-            toast.error("Failed to toggle like");
+            toast.error(`Failed to ${liked ? "unlike" : "like"} review`);
         }
     };
 

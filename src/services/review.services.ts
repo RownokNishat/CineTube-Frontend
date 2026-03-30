@@ -62,6 +62,10 @@ export async function getMediaReviewStats(mediaId: string): Promise<ApiResponse<
     return httpClient.get<ReviewStats>(`/reviews/media/${mediaId}/stats`);
 }
 
-export async function toggleReviewLike(id: string): Promise<ApiResponse<{ liked: boolean }>> {
+export async function likeReview(id: string): Promise<ApiResponse<{ liked: boolean }>> {
     return httpClient.post<{ liked: boolean }>(`/reviews/${id}/like`, {});
+}
+
+export async function unlikeReview(id: string): Promise<ApiResponse<{ liked: boolean }>> {
+    return httpClient.delete<{ liked: boolean }>(`/reviews/${id}/like`);
 }
