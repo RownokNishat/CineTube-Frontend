@@ -37,7 +37,14 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
 
     try {
         if (mediaId) {
-            const res = await getReviews({ mediaId, page, limit: 20, sortBy: "createdAt", sortOrder: "desc" });
+            const res = await getReviews({
+                mediaId,
+                page,
+                limit: 20,
+                status: "PENDING",
+                sortBy: "createdAt",
+                sortOrder: "desc",
+            });
             reviews = res.data ?? [];
             total = res.meta?.total ?? 0;
         }
@@ -56,7 +63,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2"><Star className="size-6" /> Reviews Management</h1>
-                <p className="text-muted-foreground">{mediaId ? `${total} total reviews` : "Select a media title to moderate reviews"}</p>
+                <p className="text-muted-foreground">{mediaId ? `${total} pending reviews` : "Select a media title to moderate reviews"}</p>
             </div>
 
             {!mediaId && (
