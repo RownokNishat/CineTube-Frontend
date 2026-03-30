@@ -2,6 +2,7 @@
 import { addToWatchlistAction, removeFromWatchlistAction } from "@/app/_actions/watchlist.actions";
 import { Button } from "@/components/ui/button";
 import { Bookmark, BookmarkCheck } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -37,10 +38,19 @@ const WatchlistButton = ({ mediaId, isInWatchlist: initial, isLoggedIn }: Watchl
     };
 
     return (
-        <Button variant={inWatchlist ? "default" : "outline"} onClick={handleToggle} disabled={loading} className="gap-2">
-            {inWatchlist ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
-            {inWatchlist ? "In Watchlist" : "Add to Watchlist"}
-        </Button>
+        <div className="flex gap-2">
+            <Button variant={inWatchlist ? "default" : "outline"} onClick={handleToggle} disabled={loading} className="gap-2">
+                {inWatchlist ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
+                {inWatchlist ? "In Watchlist" : "Add to Watchlist"}
+            </Button>
+            {isLoggedIn && inWatchlist && (
+                <Button variant="outline" size="icon" asChild title="View watchlist">
+                    <Link href="/watchlist">
+                        <BookmarkCheck className="size-4" />
+                    </Link>
+                </Button>
+            )}
+        </div>
     );
 };
 

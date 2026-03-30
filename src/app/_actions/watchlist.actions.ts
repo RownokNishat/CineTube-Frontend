@@ -1,6 +1,6 @@
 "use server"
 
-import { addToWatchlist, removeFromWatchlist } from "@/services/watchlist.services"
+import { addToWatchlist, removeFromWatchlist, checkWatchlistStatus, clearWatchlist } from "@/services/watchlist.services"
 import { type ApiErrorResponse, type ApiResponse } from "@/types/api.types"
 
 const getActionErrorMessage = (error: unknown, fallback: string): string => {
@@ -39,5 +39,23 @@ export const removeFromWatchlistAction = async (
         return await removeFromWatchlist(mediaId)
     } catch (error: unknown) {
         return { success: false, message: getActionErrorMessage(error, "Failed to remove from watchlist") }
+    }
+}
+
+export const checkWatchlistStatusAction = async (
+    mediaId: string
+): Promise<ApiResponse<{ inWatchlist: boolean }> | ApiErrorResponse> => {
+    try {
+        return await checkWatchlistStatus(mediaId)
+    } catch (error: unknown) {
+        return { success: false, message: getActionErrorMessage(error, "Failed to check watchlist status") }
+    }
+}
+
+export const clearWatchlistAction = async (): Promise<ApiResponse<null> | ApiErrorResponse> => {
+    try {
+        return await clearWatchlist()
+    } catch (error: unknown) {
+        return { success: false, message: getActionErrorMessage(error, "Failed to clear watchlist") }
     }
 }

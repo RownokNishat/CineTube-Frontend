@@ -1,8 +1,9 @@
 import ReviewSection from "@/components/modules/Media/ReviewSection";
 import WatchlistButton from "@/components/modules/Media/WatchlistButton";
+import PurchaseButton from "@/components/modules/Media/PurchaseButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getMediaById } from "@/services/media.services";
+import { getMediaById, getUserMediaAccess } from "@/services/media.services";
 import { getReviews } from "@/services/review.services";
 import { getWatchlist } from "@/services/watchlist.services";
 import { getUserInfo } from "@/services/auth.services";
@@ -31,11 +32,23 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
 
     // Check if media is in user's watchlist
     let isInWatchlist = false;
+    let hasMediaAccess = media.pricingType === "FREE"; // Free media is always accessible
+    
     if (user) {
         try {
             const watchlistRes = await getWatchlist();
             isInWatchlist = (watchlistRes.data ?? []).some((item) => item.mediaId === id);
         } catch { /* ignore */ }
+
+        // Check if user has access to premium media
+        if (media.pricingType === "PREMIUM") {
+            try {
+                const accessRes = await getUserMediaAccess(id);
+                if (accessRes.success && "data" in accessRes) {
+                    hasMediaAccess = accessRes.data.hasAccess;
+                }
+            } catch { /* ignore */ }
+        }
     }
 
     const avgRating = media.averageRating ?? (reviews.length > 0
@@ -117,13 +130,18 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
 
                     <div className="flex flex-wrap gap-3">
                         <WatchlistButton mediaId={id} isInWatchlist={isInWatchlist} isLoggedIn={!!user} />
-                        {media.streamingLink && (
+                        
+                        {/* Premium Media Purchase or Watch Button */}
+                        {media.pricingType === "PREMIUM" && !hasMediaAccess ? (
+                            <PurchaseButton mediaId={id} mediaTitle={media.title} isLoggedIn={!!user} price={9.99} />
+                        ) : media.streamingLink ? (
                             <Button variant="outline" asChild className="gap-2">
                                 <a href={media.streamingLink} target="_blank" rel="noopener noreferrer">
                                     <ExternalLink className="size-4" /> Watch Now
                                 </a>
                             </Button>
-                        )}
+                        ) : null}
+
                         {media.trailerUrl && (
                             <Button variant="ghost" asChild className="gap-2">
                                 <a href={media.trailerUrl} target="_blank" rel="noopener noreferrer">
@@ -135,7 +153,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
 
                     {!user && (
                         <p className="text-sm text-muted-foreground">
-                            <Link href="/login" className="text-primary underline">Sign in</Link> to add to watchlist and write reviews.
+                            <Link href="/login" className="text-primary underline">Sign in</Link> to {media.pricingType === "PREMIUM" ? "purchase and" : ""} add to watchlist and write reviews.
                         </p>
                     )}
                 </div>

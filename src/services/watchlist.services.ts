@@ -7,9 +7,17 @@ export async function getWatchlist(): Promise<ApiResponse<WatchlistItem[]>> {
 }
 
 export async function addToWatchlist(mediaId: string): Promise<ApiResponse<WatchlistItem>> {
-    return httpClient.post<WatchlistItem>("/watchlist", { mediaId });
+    return httpClient.post<WatchlistItem>(`/watchlist/${mediaId}`, {});
 }
 
 export async function removeFromWatchlist(mediaId: string): Promise<ApiResponse<null>> {
     return httpClient.delete<null>(`/watchlist/${mediaId}`);
+}
+
+export async function checkWatchlistStatus(mediaId: string): Promise<ApiResponse<{ inWatchlist: boolean }>> {
+    return httpClient.get<{ inWatchlist: boolean }>(`/watchlist/${mediaId}/status`);
+}
+
+export async function clearWatchlist(): Promise<ApiResponse<null>> {
+    return httpClient.delete<null>("/watchlist/clear");
 }

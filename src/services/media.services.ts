@@ -25,3 +25,18 @@ export async function updateMedia(id: string, formData: FormData): Promise<ApiRe
 export async function deleteMedia(id: string): Promise<ApiResponse<null>> {
     return httpClient.delete<null>(`/media/${id}`);
 }
+
+// Premium Media Purchase Endpoints
+export async function createMediaCheckoutSession(mediaId: string): Promise<ApiResponse<{ checkoutUrl: string; sessionId: string }>> {
+    return httpClient.post<{ checkoutUrl: string; sessionId: string }>("/media/purchase/checkout", {
+        mediaId,
+    });
+}
+
+export async function getUserMediaAccess(mediaId: string): Promise<ApiResponse<{ hasAccess: boolean }>> {
+    return httpClient.get<{ hasAccess: boolean }>(`/media/${mediaId}/access`);
+}
+
+export async function getPurchasedMedia(): Promise<ApiResponse<Media[]>> {
+    return httpClient.get<Media[]>("/media/purchases/my-purchases");
+}
