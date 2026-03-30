@@ -1,6 +1,6 @@
 "use server"
 
-import { createMediaCheckoutSession, getUserMediaAccess } from "@/services/media.services"
+import { createMediaCheckoutSession, getUserMediaAccess, verifyMediaPurchase } from "@/services/media.services"
 import { type ApiErrorResponse, type ApiResponse } from "@/types/api.types"
 
 const getActionErrorMessage = (error: unknown, fallback: string): string => {
@@ -54,5 +54,30 @@ export const checkUserMediaAccessAction = async (
         return await getUserMediaAccess(mediaId)
     } catch (error: unknown) {
         return { success: false, message: getActionErrorMessage(error, "Failed to check media access") }
+    }
+}
+
+export const verifyMediaPurchaseAction = async (
+    sessionId: string
+): Promise<ApiResponse<{ hasAccess: boolean; mediaId?: string; reason?: string; purchase?: { media?: { id?: string } } }> | ApiErrorResponse> => {
+    try {
+        return await verifyMediaPurchase(sessionId)
+    } catch (error: unknown) {
+        const statusCode =
+            error &&
+            typeof error === "object" &&
+            "response" in error &&
+            error.response &&
+            typeof error.response === "object" &&
+            "status" in error.response &&
+            typeof error.response.status === "number"
+                ? error.response.status
+                : undefined
+
+        return {
+            success: false,
+            message: getActionErrorMessage(error, "Failed to verify media purchase"),
+            statusCode,
+        }
     }
 }

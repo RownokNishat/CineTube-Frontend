@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle2, Loader2, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { verifyMediaPurchase } from "@/services/media.services"
+import { verifyMediaPurchaseAction } from "@/app/_actions/media.actions"
 
 type VerifyState = "polling" | "confirmed" | "failed"
 
@@ -21,14 +21,34 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
     const [state, setState] = useState<VerifyState>("polling")
     const [mediaId, setMediaId] = useState<string | null>(null)
     const [errorText, setErrorText] = useState<string>("")
+    const [isUnauthorized, setIsUnauthorized] = useState(false)
     const attemptsRef = useRef(0)
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const verify = useCallback(async () => {
         try {
-            const result = await verifyMediaPurchase(sessionId)
+            const result = await verifyMediaPurchaseAction(sessionId)
 
-            if (result.success && result.data.hasAccess) {
+            if (!result.success) {
+                if (result.statusCode === 401) {
+                    setIsUnauthorized(true)
+                    setErrorText("Please sign in to confirm your purchase and unlock the movie.")
+                    setState("failed")
+                    return
+                }
+
+                attemptsRef.current += 1
+                if (attemptsRef.current >= MAX_ATTEMPTS) {
+                    setErrorText(result.message || "Payment verification is taking longer than expected. Please try again.")
+                    setState("failed")
+                    return
+                }
+
+                timerRef.current = setTimeout(verify, POLL_INTERVAL_MS)
+                return
+            }
+
+            if (result.data.hasAccess) {
                 const resolvedMediaId =
                     result.data.mediaId ||
                     result.data.purchase?.media?.id ||
@@ -125,9 +145,17 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
                 </p>
             </div>
             <div className="flex gap-3">
-                <Button onClick={() => { attemptsRef.current = 0; setErrorText(""); setState("polling"); verify() }}>
-                    Try Again
-                </Button>
+                {isUnauthorized ? (
+                    <Button asChild>
+                        <Link href={`/login?redirect=${encodeURIComponent(`/payment/success?session_id=${sessionId}`)}`}>
+                            Sign In to Continue
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button onClick={() => { attemptsRef.current = 0; setErrorText(""); setState("polling"); verify() }}>
+                        Try Again
+                    </Button>
+                )}
                 <Button variant="outline" asChild>
                     <Link href="/media">Browse Media</Link>
                 </Button>
