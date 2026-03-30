@@ -1,6 +1,6 @@
 "use server"
 
-import { deleteReview, updateReview } from "@/services/review.services"
+import { adminDeleteReview, approveReview, unpublishReview } from "@/services/review.services"
 import { type ApiErrorResponse, type ApiResponse } from "@/types/api.types"
 import { type Review } from "@/types/review.types"
 
@@ -23,22 +23,31 @@ const getActionErrorMessage = (error: unknown, fallback: string): string => {
     return fallback
 }
 
-export const updateReviewAction = async (
-    id: string,
-    payload: { status: string }
+export const approveReviewAction = async (
+    id: string
 ): Promise<ApiResponse<Review> | ApiErrorResponse> => {
     try {
-        return await updateReview(id, payload)
+        return await approveReview(id)
     } catch (error: unknown) {
-        return { success: false, message: getActionErrorMessage(error, "Failed to update review") }
+        return { success: false, message: getActionErrorMessage(error, "Failed to approve review") }
     }
 }
 
-export const deleteReviewAction = async (
+export const unpublishReviewAction = async (
+    id: string
+): Promise<ApiResponse<Review> | ApiErrorResponse> => {
+    try {
+        return await unpublishReview(id)
+    } catch (error: unknown) {
+        return { success: false, message: getActionErrorMessage(error, "Failed to unpublish review") }
+    }
+}
+
+export const adminDeleteReviewAction = async (
     id: string
 ): Promise<ApiResponse<null> | ApiErrorResponse> => {
     try {
-        return await deleteReview(id)
+        return await adminDeleteReview(id)
     } catch (error: unknown) {
         return { success: false, message: getActionErrorMessage(error, "Failed to delete review") }
     }

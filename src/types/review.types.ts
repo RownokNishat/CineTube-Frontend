@@ -14,11 +14,33 @@ export interface Review {
         name: string;
         image: string | null;
     };
+    media?: {
+        id: string;
+        title: string;
+    };
     _count: {
         likes: number;
         comments: number;
     };
     isLiked?: boolean;
+}
+
+export interface ReviewStats {
+    mediaId: string;
+    title: string;
+    totalReviews: number;
+    averageRating: number;
+    ratingDistribution: Record<string, number>;
+    pendingReviewsCount: number;
+    pendingReviews: Array<{
+        id: string;
+        createdAt: string;
+        user?: {
+            id: string;
+            name: string;
+            image?: string | null;
+        };
+    }>;
 }
 
 export interface Comment {

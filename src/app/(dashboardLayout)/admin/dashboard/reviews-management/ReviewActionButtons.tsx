@@ -4,7 +4,7 @@ import { CheckCircle, Trash2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { deleteReviewAction, updateReviewAction } from "./_action";
+import { adminDeleteReviewAction, approveReviewAction, unpublishReviewAction } from "./_action";
 
 interface ReviewActionButtonsProps {
     reviewId: string;
@@ -20,8 +20,10 @@ const ReviewActionButtons = ({ reviewId, currentStatus }: ReviewActionButtonsPro
         setLoading(true);
         try {
             const result = action === "delete"
-                ? await deleteReviewAction(reviewId)
-                : await updateReviewAction(reviewId, { status: action === "publish" ? "PUBLISHED" : "UNPUBLISHED" });
+                ? await adminDeleteReviewAction(reviewId)
+                : action === "publish"
+                    ? await approveReviewAction(reviewId)
+                    : await unpublishReviewAction(reviewId);
 
             if (!result.success) {
                 toast.error(result.message || "Action failed");

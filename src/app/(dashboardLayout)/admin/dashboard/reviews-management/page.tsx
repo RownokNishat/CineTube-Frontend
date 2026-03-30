@@ -1,28 +1,40 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getReviews } from "@/services/review.services";
+import { getMediaReviewStats, getReviews } from "@/services/review.services";
 import { Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import ReviewActionButtons from "./ReviewActionButtons";
+import { type ReviewStats } from "@/types/review.types";
 
 export const dynamic = "force-dynamic";
 
 interface ReviewsManagementPageProps {
-    searchParams: Promise<{ page?: string }>;
+    searchParams: Promise<{ page?: string; mediaId?: string }>;
 }
 
 const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProps) => {
     const params = await searchParams;
     const page = Number(params.page ?? 1);
+    const mediaId = params.mediaId;
 
     let reviews: Awaited<ReturnType<typeof getReviews>>["data"] = [];
     let total = 0;
+    let stats: ReviewStats | null = null;
     try {
-        const res = await getReviews({ page, limit: 20, sortBy: "createdAt", sortOrder: "desc" });
+        const res = await getReviews({ mediaId, page, limit: 20, sortBy: "createdAt", sortOrder: "desc" });
         reviews = res.data ?? [];
         total = res.meta?.total ?? 0;
     } catch { /* empty */ }
+
+    if (mediaId) {
+        try {
+            const statsRes = await getMediaReviewStats(mediaId);
+            stats = statsRes.data;
+        } catch {
+            stats = null;
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -30,6 +42,25 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                 <h1 className="text-2xl font-bold flex items-center gap-2"><Star className="size-6" /> Reviews Management</h1>
                 <p className="text-muted-foreground">{total} total reviews</p>
             </div>
+
+            {stats && (
+                <Card>
+                    <CardContent className="grid grid-cols-1 gap-4 p-4 md:grid-cols-3">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Media</p>
+                            <p className="font-semibold">{stats.title}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">Average Rating</p>
+                            <p className="font-semibold">{stats.averageRating?.toFixed(1) ?? "0.0"} / 10</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">Pending Reviews</p>
+                            <p className="font-semibold">{stats.pendingReviewsCount}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardContent className="p-0">
