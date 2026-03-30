@@ -54,3 +54,35 @@ export const reviewZodSchema = z.object({
 });
 
 export type IReviewPayload = z.infer<typeof reviewZodSchema>;
+
+export const updateProfileZodSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters").max(80, "Name can be at most 80 characters"),
+    image: z
+        .union([
+            z.string().url("Image URL must be a valid URL"),
+            z.literal(""),
+            z.null(),
+            z.undefined(),
+        ])
+        .optional(),
+});
+
+export type IUpdateProfilePayload = z.infer<typeof updateProfileZodSchema>;
+
+export const changePasswordZodSchema = z
+    .object({
+        currentPassword: z.string().min(8, "Current password must be at least 8 characters"),
+        newPassword: z
+            .string()
+            .min(8, "Password must be at least 8 characters long")
+            .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+            .regex(/[0-9]/, "Password must contain at least one number")
+            .regex(/[@$!%*?&]/, "Password must contain at least one special character"),
+        confirmPassword: z.string().min(8, "Confirm password must be at least 8 characters"),
+    })
+    .refine((value) => value.newPassword === value.confirmPassword, {
+        message: "Confirm password must match new password",
+        path: ["confirmPassword"],
+    });
+
+export type IChangePasswordPayload = z.infer<typeof changePasswordZodSchema>;

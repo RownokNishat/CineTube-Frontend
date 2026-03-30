@@ -23,12 +23,29 @@ export interface UsersQueryParams {
     status?: string;
 }
 
+export interface UpdateMyProfilePayload {
+    name: string;
+    image?: string | null;
+}
+
 export async function getAllUsers(params?: UsersQueryParams): Promise<ApiResponse<UserProfile[]>> {
     return httpClient.get<UserProfile[]>("/users", { params: params as Record<string, unknown> });
 }
 
 export async function getUserById(id: string): Promise<ApiResponse<UserProfile>> {
     return httpClient.get<UserProfile>(`/users/${id}`);
+}
+
+export async function getMyProfile(): Promise<ApiResponse<UserProfile>> {
+    return httpClient.get<UserProfile>("/users/me");
+}
+
+export async function updateMyProfile(payload: UpdateMyProfilePayload): Promise<ApiResponse<UserProfile>> {
+    return httpClient.patch<UserProfile>("/users/me", payload);
+}
+
+export async function updateUserProfileById(id: string, payload: UpdateMyProfilePayload): Promise<ApiResponse<UserProfile>> {
+    return httpClient.patch<UserProfile>(`/users/${id}/profile`, payload);
 }
 
 export async function updateUser(id: string, formData: FormData): Promise<ApiResponse<UserProfile>> {

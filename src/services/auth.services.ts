@@ -158,6 +158,52 @@ export async function resetPassword(email: string, otp: string, newPassword: str
     return json;
 }
 
+export async function changeMyPassword(currentPassword: string, newPassword: string) {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    const res = await fetch(`${BASE_API_URL}/auth/change-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Cookie: `accessToken=${accessToken ?? ""}; better-auth.session_token=${sessionToken ?? ""}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+        throw new Error(json.message || "Failed to change password");
+    }
+
+    return json;
+}
+
+export async function adminResetPassword(userId: string, newPassword: string) {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    const res = await fetch(`${BASE_API_URL}/auth/admin/reset-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Cookie: `accessToken=${accessToken ?? ""}; better-auth.session_token=${sessionToken ?? ""}`,
+        },
+        body: JSON.stringify({ userId, newPassword }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+        throw new Error(json.message || "Failed to reset user password");
+    }
+
+    return json;
+}
+
 export async function logoutUser() {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;

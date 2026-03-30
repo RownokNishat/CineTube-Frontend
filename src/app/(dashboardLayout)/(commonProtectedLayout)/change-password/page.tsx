@@ -1,8 +1,8 @@
 
+import ChangePasswordForm from "@/app/(dashboardLayout)/(commonProtectedLayout)/change-password/_components/ChangePasswordForm"
+
 const ChangePasswordPage = () => {
-  return (
-    <div>ChangePasswordPage</div>
-  )
+  return <ChangePasswordForm />
 }
 
 export default ChangePasswordPage
