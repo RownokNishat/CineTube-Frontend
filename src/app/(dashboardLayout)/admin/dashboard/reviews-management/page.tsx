@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { getMediaReviewStats, getReviews } from "@/services/review.services";
+import { getMediaReviewStats, getReviewById, getReviews } from "@/services/review.services";
 import { getMediaList } from "@/services/media.services";
 import { Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -35,6 +35,15 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
         }
     }
 
+    if (mediaId) {
+        try {
+            const statsRes = await getMediaReviewStats(mediaId);
+            stats = statsRes.data;
+        } catch {
+            stats = null;
+        }
+    }
+
     try {
         if (mediaId) {
             const res = await getReviews({
@@ -47,17 +56,24 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
             });
             reviews = res.data ?? [];
             total = res.meta?.total ?? 0;
+
+            if (reviews.length === 0 && stats?.pendingReviews?.length) {
+                const reviewDetails = await Promise.all(
+                    stats.pendingReviews.map(async (pendingReview) => {
+                        try {
+                            const detailRes = await getReviewById(pendingReview.id);
+                            return detailRes.data;
+                        } catch {
+                            return null;
+                        }
+                    })
+                );
+
+                reviews = reviewDetails.filter((review): review is NonNullable<typeof review> => Boolean(review));
+                total = stats.pendingReviewsCount;
+            }
         }
     } catch { /* empty */ }
-
-    if (mediaId) {
-        try {
-            const statsRes = await getMediaReviewStats(mediaId);
-            stats = statsRes.data;
-        } catch {
-            stats = null;
-        }
-    }
 
     return (
         <div className="space-y-6">

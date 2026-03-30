@@ -34,6 +34,10 @@ export async function createReview(payload: CreateReviewPayload): Promise<ApiRes
     return httpClient.post<Review>(`/reviews/media/${mediaId}`, data);
 }
 
+export async function getReviewById(id: string): Promise<ApiResponse<Review>> {
+    return httpClient.get<Review>(`/reviews/${id}`);
+}
+
 export async function updateReview(id: string, payload: Partial<CreateReviewPayload> & { status?: string }): Promise<ApiResponse<Review>> {
     return httpClient.patch<Review>(`/reviews/${id}`, payload);
 }

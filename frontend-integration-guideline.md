@@ -1,108 +1,102 @@
-# CineTube Frontend Integration Guideline
+Fixed on backend. The key moderation mismatch is now resolved.
 
-## Base Setup
-1. Base API URL: `https://cine-tube-backend-hto3.vercel.app/api/v1`
-2. Auth model: cookie-based session (`better-auth.session_token` + access token cookie).
-3. Frontend must send credentials on every protected request.
-4. Shared response shape:
-   - `success: boolean`
-   - `message: string`
-   - `data: object | array`
-   - `meta` for paginated endpoints
+What I changed for reviews
+1. Public media reviews endpoint remains public and returns published reviews only.
+2. Added admin-only review list endpoint that supports status filtering (including pending).
+3. Added explicit reject action for admins.
+4. Enriched stats pending payload so admin UI can render pending queue directly.
+5. Kept approve/unpublish/delete moderation endpoints for admin.
 
-## Critical Frontend Rules
-1. Treat `401` as unauthenticated and redirect to login.
-2. Treat `403` as role/permission denied.
-3. Treat `409` as business conflict (already reviewed, already liked, already in watchlist, already purchased).
-4. For delete requests, prefer path-parameter endpoints over body-based delete.
-5. After payment success redirect, always verify purchase before showing `Watch Now`.
+Backend review API map (final)
 
-## 1. Auth + User APIs
-1. `POST /auth/register`
-2. `POST /auth/login`
-3. `GET /auth/me`
-4. `POST /auth/change-password`
-5. `POST /auth/logout`
-6. `GET /users/me`
-7. `PATCH /users/me`
-   - Body: `name` (required, min 2), `image` (optional URL or null)
+User/public review APIs
+1. GET /api/v1/reviews/media/:mediaId
+Purpose: public list for users. Returns published reviews only.
+2. POST /api/v1/reviews/media/:mediaId
+Purpose: create review (authenticated).
+3. GET /api/v1/reviews/:reviewId
+Purpose: get single review.
+4. PATCH /api/v1/reviews/:reviewId
+Purpose: author edits own unpublished review.
+5. DELETE /api/v1/reviews/:reviewId
+Purpose: author deletes own review.
+6. POST /api/v1/reviews/:reviewId/like
+Purpose: like review.
+7. DELETE /api/v1/reviews/:reviewId/like
+Purpose: unlike review.
+8. GET /api/v1/reviews/:reviewId/comments
+Purpose: list comments.
+9. POST /api/v1/reviews/:reviewId/comments
+Purpose: add comment.
+10. PATCH /api/v1/reviews/comments/:commentId
+Purpose: edit own comment.
+11. DELETE /api/v1/reviews/comments/:commentId
+Purpose: delete own comment.
+12. POST /api/v1/reviews/comments/:commentId/replies
+Purpose: reply to comment.
+13. POST /api/v1/reviews/comments/:commentId/like
+Purpose: like comment.
+14. DELETE /api/v1/reviews/comments/:commentId/like
+Purpose: unlike comment.
 
-## 2. Media Browse + Access APIs
-1. `GET /media`
-2. `GET /media/:id`
-3. `GET /media/:id/access` (authenticated)
-   - Output: `hasAccess`, `reason` (`free`, `purchased`, `purchase_required`)
+Admin moderation APIs
+1. GET /api/v1/reviews/admin/media/:mediaId?status=PENDING&page=1&limit=10
+Purpose: admin table source for pending/other statuses.
+2. PATCH /api/v1/reviews/:reviewId/approve
+Purpose: approve pending review to published.
+3. PATCH /api/v1/reviews/:reviewId/reject
+Purpose: reject pending review (marks unpublished).
+4. PATCH /api/v1/reviews/:reviewId/unpublish
+Purpose: unpublish published review.
+5. DELETE /api/v1/reviews/:reviewId/admin
+Purpose: admin delete inappropriate review.
+6. DELETE /api/v1/reviews/comments/:commentId/admin
+Purpose: admin delete inappropriate comment.
+7. GET /api/v1/reviews/media/:mediaId/stats
+Purpose: analytics + pending counts and pending summaries.
 
-UI rule:
-1. If `hasAccess=true`: show `Watch Now`.
-2. If `hasAccess=false`: show `Buy Now`.
+Frontend connection guideline (no code)
 
-## 3. Purchase APIs
-1. `POST /media/purchase/checkout` (authenticated)
-2. `GET /media/purchases/verify?sessionId=...` (authenticated)
-3. `GET /media/purchases/my-purchases` (authenticated)
-4. `POST /stripe/webhook` (backend-only)
+Admin reviews management
+1. Stats card must call: /reviews/media/:mediaId/stats
+2. Pending table must call: /reviews/admin/media/:mediaId?status=PENDING
+3. Approved table should call: /reviews/admin/media/:mediaId?status=PUBLISHED
+4. Rejected table should call: /reviews/admin/media/:mediaId?status=UNPUBLISHED
+5. After approve/reject/unpublish/delete, immediately refetch both:
+- stats endpoint
+- current table endpoint
 
-Payment UX sequence:
-1. User clicks Buy Now.
-2. Checkout is created and user is redirected to Stripe.
-3. Stripe returns to success page with `session_id`.
-4. Frontend calls verify endpoint until confirmed.
-5. Once confirmed, frontend calls `/media/:id/access` and switches button to `Watch Now`.
+User reviews page
+1. Reviews list should call only /reviews/media/:mediaId
+2. Do not use admin endpoint on user screens.
+3. Create review should optimistically add “pending moderation” state in UI.
+4. If create returns 409, show “You already reviewed this title”.
 
-## 4. Watchlist APIs (authenticated)
-1. `GET /watchlist`
-2. `POST /watchlist/:mediaId`
-   - Compatibility: `POST /watchlist` with `mediaId` in body/query
-3. `DELETE /watchlist/:mediaId`
-   - Also supports watchlist entry id
-4. `GET /watchlist/:mediaId/status`
-   - Compatibility: `/watchlist/status?mediaId=...`
-5. `DELETE /watchlist/clear`
+Moderation state model to use in UI
+1. PENDING: waiting admin action
+2. PUBLISHED: visible publicly
+3. UNPUBLISHED: rejected/hidden by admin
 
-Best practice:
-1. Use `/watchlist/:mediaId/status` for toggle state.
-2. Use `/watchlist/:mediaId` for add/remove.
-3. Avoid relying on DELETE body unless necessary.
+Expected status handling
+1. 200/201: success
+2. 400: validation/business rule error
+3. 401: login required
+4. 403: role/ownership denied
+5. 404: review/comment/media not found
+6. 409: duplicate action (already reviewed/liked)
 
-## 5. Reviews, Likes, Comments (User)
-1. `GET /reviews/media/:mediaId`
-2. `POST /reviews/media/:mediaId` (authenticated)
-3. `GET /reviews/:reviewId`
-4. `PATCH /reviews/:reviewId` (authenticated, owner only, unpublished only)
-5. `DELETE /reviews/:reviewId` (authenticated, owner only)
-6. `POST /reviews/:reviewId/like`
-7. `DELETE /reviews/:reviewId/like`
-8. `GET /reviews/:reviewId/comments`
-9. `POST /reviews/:reviewId/comments` (authenticated)
-10. `PATCH /reviews/comments/:commentId` (authenticated, owner only)
-11. `DELETE /reviews/comments/:commentId` (authenticated, owner only)
-12. `POST /reviews/comments/:commentId/replies` (authenticated)
-13. `POST /reviews/comments/:commentId/like`
-14. `DELETE /reviews/comments/:commentId/like`
+Watchlist note
+- Use /api/v1/watchlist/:mediaId for add/remove and /api/v1/watchlist/:mediaId/status for toggle checks.
+- Backend now also supports compatibility shapes, but these param routes are the safest primary integration path.
 
-## 6. Review Moderation + Analytics (Admin)
-1. `PATCH /reviews/:reviewId/approve`
-2. `PATCH /reviews/:reviewId/unpublish`
-3. `DELETE /reviews/:reviewId/admin`
-4. `DELETE /reviews/comments/:commentId/admin`
-5. `GET /reviews/media/:mediaId/stats`
+Connection verification checklist
+1. Admin pending count from stats equals row count from admin pending list query.
+2. Approve action moves item from pending list to published list.
+3. Reject action removes item from pending list and appears in unpublished list.
+4. User-side list never shows pending/unpublished reviews.
+5. Like/comment actions return correct counters after refetch.
 
-## 7. Media Management (Admin)
-1. `POST /media`
-2. `PATCH /media/:id`
-3. `DELETE /media/:id`
+One important security note
+- Your .env content in chat includes real secrets (Stripe, DB, OAuth, SMTP, JWT). Rotate them immediately in provider dashboards.
 
-Use for catalog fields: title, synopsis, genre, year, director, cast, platform, pricing, links, poster, status.
-
-## 8. Frontend Integration Checklist
-1. Configure one API client with credentials enabled.
-2. Centralize handling for `401`, `403`, `409`, `422/400`, `500`.
-3. Build auth guard using `/auth/me` or `/users/me`.
-4. Build entitlement guard using `/media/:id/access`.
-5. Build purchase success flow around `/media/purchases/verify`.
-6. Build watchlist toggle around `/watchlist/:mediaId/status`.
-7. Build optimistic UI for likes/comments/watchlist with rollback on failure.
-8. Build admin-only routes/pages gated by role.
-9. Use server messages for toast notifications.
-10. For paginated endpoints, always consume `meta`.
+Made changes.
