@@ -3,7 +3,7 @@ import WatchlistButton from "@/components/modules/Media/WatchlistButton";
 import PurchaseButton from "@/components/modules/Media/PurchaseButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getMediaById, getUserMediaAccess } from "@/services/media.services";
+import { getMediaById, getUserMediaAccess, verifyMediaPurchase } from "@/services/media.services";
 import { getReviews } from "@/services/review.services";
 import { getWatchlist } from "@/services/watchlist.services";
 import { getUserInfo } from "@/services/auth.services";
@@ -14,10 +14,13 @@ import { notFound } from "next/navigation";
 
 interface MediaDetailPageProps {
     params: Promise<{ id: string }>;
+    searchParams: Promise<{ session_id?: string; purchase_session?: string }>;
 }
 
-export default async function MediaDetailPage({ params }: MediaDetailPageProps) {
+export default async function MediaDetailPage({ params, searchParams }: MediaDetailPageProps) {
     const { id } = await params;
+    const query = await searchParams;
+    const purchaseSessionId = query.session_id || query.purchase_session;
 
     const [mediaRes, reviewsRes, user] = await Promise.all([
         getMediaById(id).catch(() => null),
@@ -50,6 +53,21 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
                 hasMediaAccess = accessRes.data.hasAccess;
             }
         } catch { /* ignore */ }
+
+        // Fallback right after Stripe redirect: verify by checkout session id.
+        if (!hasMediaAccess && purchaseSessionId) {
+            try {
+                const verifyRes = await verifyMediaPurchase(purchaseSessionId);
+                if (
+                    verifyRes.success &&
+                    "data" in verifyRes &&
+                    verifyRes.data.hasAccess &&
+                    (!verifyRes.data.mediaId || verifyRes.data.mediaId === id)
+                ) {
+                    hasMediaAccess = true;
+                }
+            } catch { /* ignore */ }
+        }
     }
 
     const avgRating = media.averageRating ?? (reviews.length > 0

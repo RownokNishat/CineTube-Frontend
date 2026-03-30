@@ -81,7 +81,7 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
                 <div className="flex gap-3">
                     {mediaId && (
                         <Button asChild>
-                            <Link href={`/media/${mediaId}`}>Watch Now</Link>
+                            <Link href={`/media/${mediaId}?purchase_session=${encodeURIComponent(sessionId)}`}>Watch Now</Link>
                         </Button>
                     )}
                     <Button
