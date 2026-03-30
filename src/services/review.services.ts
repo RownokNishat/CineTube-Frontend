@@ -11,11 +11,26 @@ export interface ReviewQueryParams {
 }
 
 export async function getReviews(params?: ReviewQueryParams): Promise<ApiResponse<Review[]>> {
+    if (params?.mediaId) {
+        const { mediaId, sortBy, sortOrder, ...rest } = params;
+
+        const mediaScopedParams: Record<string, unknown> = {
+            ...rest,
+        };
+
+        if (sortBy) {
+            mediaScopedParams.sort = `${sortOrder === "asc" ? "" : "-"}${sortBy}`;
+        }
+
+        return httpClient.get<Review[]>(`/reviews/media/${mediaId}`, { params: mediaScopedParams });
+    }
+
     return httpClient.get<Review[]>("/reviews", { params: params as Record<string, unknown> });
 }
 
 export async function createReview(payload: CreateReviewPayload): Promise<ApiResponse<Review>> {
-    return httpClient.post<Review>("/reviews", payload);
+    const { mediaId, ...data } = payload;
+    return httpClient.post<Review>(`/reviews/media/${mediaId}`, data);
 }
 
 export async function updateReview(id: string, payload: Partial<CreateReviewPayload> & { status?: string }): Promise<ApiResponse<Review>> {
