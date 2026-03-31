@@ -81,7 +81,7 @@ const ReviewCard = ({
         if (comments.length > 0) { setShowComments((v) => !v); return; }
         setLoadingComments(true);
         try {
-            const result = await getCommentsAction(review.id);
+            const result = await getCommentsAction(review.id, !!isAdmin);
             setComments(result.success ? (result.data ?? []) : []);
             if (!result.success) toast.error(result.message || "Failed to load comments");
             setShowComments(true);
@@ -100,9 +100,15 @@ const ReviewCard = ({
         try {
             const result = await createCommentAction({ reviewId: review.id, content: commentText });
             if (!result.success) { toast.error(result.message || "Failed to add comment"); return; }
-            setComments((prev) => [...prev, result.data]);
+            if (result.data?.status === "PUBLISHED" || isAdmin) {
+                setComments((prev) => [...prev, result.data]);
+            }
             setCommentText("");
-            toast.success("Comment added");
+            toast.success(
+                result.data?.status === "PUBLISHED"
+                    ? "Comment added"
+                    : "Comment submitted! Pending admin approval.",
+            );
         } catch {
             toast.error("Failed to add comment");
         } finally {
@@ -388,12 +394,18 @@ const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId, isAdmin }:
                 tags: parsedPayload.data.tags,
             });
             if (!result.success) { setError(result.message || "Failed to submit review"); return; }
-            setReviews((prev) => [result.data, ...prev]);
+            if (result.data?.status === "PUBLISHED" || isAdmin) {
+                setReviews((prev) => [result.data, ...prev]);
+            }
             setContent("");
             setTags("");
             setIsSpoiler(false);
             setRating(7);
-            toast.success("Review submitted! Pending admin approval.");
+            toast.success(
+                result.data?.status === "PUBLISHED"
+                    ? "Review submitted!"
+                    : "Review submitted! Pending admin approval.",
+            );
         } catch (err: any) {
             setError(err?.message || "Failed to submit review");
         } finally {

@@ -10,7 +10,7 @@ if(!BASE_API_URL){
     throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
 }
 
-async function storeTokensFromSetCookieHeaders(headers: Headers): Promise<void> {
+export async function storeTokensFromSetCookieHeaders(headers: Headers): Promise<void> {
     const tokenNames = ["accessToken", "refreshToken", "better-auth.session_token"];
     // Node 18+ fetch supports getSetCookie() returning an array
     const setCookieHeaders: string[] = (headers as unknown as { getSetCookie?: () => string[] }).getSetCookie?.() ?? [];

@@ -39,6 +39,7 @@ export const adminNavItems: NavSection[] = [
             { title: "Media Library", href: "/admin/dashboard/media-management", icon: "Film" },
             { title: "Genres", href: "/admin/dashboard/genres-management", icon: "Tag" },
             { title: "Reviews", href: "/admin/dashboard/reviews-management", icon: "Star" },
+            { title: "Comments", href: "/admin/dashboard/comments-management", icon: "MessageCircle" },
         ],
     },
     {

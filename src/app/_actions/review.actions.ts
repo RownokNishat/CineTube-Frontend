@@ -1,6 +1,6 @@
 "use server"
 
-import { getComments, createComment } from "@/services/comment.services"
+import { getAdminComments, getComments, createComment } from "@/services/comment.services"
 import { createReview, deleteReview, likeReview, unlikeReview, updateReview } from "@/services/review.services"
 import { type ApiErrorResponse, type ApiResponse } from "@/types/api.types"
 import { type Comment, type Review } from "@/types/review.types"
@@ -84,9 +84,13 @@ export const unlikeReviewAction = async (
 }
 
 export const getCommentsAction = async (
-    reviewId: string
+    reviewId: string,
+    isAdmin = false,
 ): Promise<ApiResponse<Comment[]> | ApiErrorResponse> => {
     try {
+        if (isAdmin) {
+            return await getAdminComments({ reviewId, limit: 100, sort: "-createdAt" })
+        }
         return await getComments({ reviewId })
     } catch (error: unknown) {
         return { success: false, message: getActionErrorMessage(error, "Failed to load comments") }
