@@ -11,28 +11,28 @@ const Navbar = async () => {
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-                    <Film className="size-6 text-primary" />
-                    <span>CineTube</span>
+            <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between\">
+                <Link href="/" className="flex items-center gap-1 sm:gap-2 font-bold text-base sm:text-xl shrink-0\">
+                    <Film className="size-5 sm:size-6 text-primary" />
+                    <span className="hidden sm:inline">CineTube</span>
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-6 text-sm">
+                <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-xs sm:text-sm flex-1 ml-4\">
                     <Link href="/media" className="text-muted-foreground hover:text-foreground transition-colors">Movies &amp; Series</Link>
                     <Link href="/media?mediaType=MOVIE" className="text-muted-foreground hover:text-foreground transition-colors">Movies</Link>
                     <Link href="/media?mediaType=SERIES" className="text-muted-foreground hover:text-foreground transition-colors">Series</Link>
                 </nav>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3\">
                     {user ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex items-center gap-2 rounded-full">
-                                    <Avatar className="size-8">
+                                <button className="flex items-center gap-1 sm:gap-2 rounded-full\">
+                                    <Avatar className="size-7 sm:size-8\">
                                         <AvatarImage src={user.image ?? ""} />
                                         <AvatarFallback className="text-xs">{user.name?.[0]?.toUpperCase()}</AvatarFallback>
                                     </Avatar>
-                                    <span className="hidden sm:block text-sm font-medium">{user.name}</span>
+                                    <span className="hidden sm:block text-xs sm:text-sm font-medium\">{user.name}</span>
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
@@ -60,7 +60,7 @@ const Navbar = async () => {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2\">
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href="/login">Sign In</Link>
                             </Button>

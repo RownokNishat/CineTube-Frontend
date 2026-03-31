@@ -71,16 +71,16 @@ export default async function Home() {
     return (
         <div className="min-h-screen">
             {/* Hero Section */}
-            <section className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-24 px-4">
+            <section className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 md:py-24 px-3 sm:px-4">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 tracking-tight">
                         Discover & Rate <br />
                         <span className="text-primary">Movies & Series</span>
                     </h1>
-                    <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                    <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto">
                         Explore thousands of movies and TV series, share your reviews, and discover what to watch next.
                     </p>
-                    <div className="flex flex-wrap gap-4 justify-center">
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 justify-center">
                         <Button size="lg" asChild>
                             <Link href="/media">Browse All <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>
@@ -88,44 +88,44 @@ export default async function Home() {
                             <Link href="/register">Join Free</Link>
                         </Button>
                     </div>
-                    <div className="flex justify-center gap-8 mt-12 text-gray-300">
+                    <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-8 mt-8 sm:mt-10 md:mt-12 text-gray-300 text-xs sm:text-sm">
                         <div className="flex items-center gap-2">
-                            <Film className="size-5 text-primary" />
-                            <span className="text-sm">Movies</span>
+                            <Film className="size-4 sm:size-5 text-primary" />
+                            <span>Movies</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Tv className="size-5 text-primary" />
-                            <span className="text-sm">Series</span>
+                            <Tv className="size-4 sm:size-5 text-primary" />
+                            <span>Series</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Star className="size-5 text-yellow-400" />
-                            <span className="text-sm">Rate & Review</span>
+                            <Star className="size-4 sm:size-5 text-yellow-400" />
+                            <span>Rate & Review</span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section className="-mt-10 px-4 relative z-10">
-                <div className="mx-auto max-w-6xl rounded-3xl border bg-background/95 p-6 shadow-2xl backdrop-blur">
-                    <div className="mb-4 flex items-center gap-2">
-                        <Compass className="size-5 text-primary" />
-                        <h2 className="text-xl font-semibold">Find your next watch</h2>
+            <section className="-mt-8 sm:-mt-10 px-2 sm:px-4 relative z-10">
+                <div className="mx-auto max-w-6xl rounded-xl sm:rounded-2xl md:rounded-3xl border bg-background/95 p-3 sm:p-4 md:p-6 shadow-xl md:shadow-2xl backdrop-blur">
+                    <div className="mb-3 sm:mb-4 flex items-center gap-2">
+                        <Compass className="size-4 sm:size-5 text-primary" />
+                        <h2 className="text-base sm:text-lg md:text-xl font-semibold">Find your next watch</h2>
                     </div>
-                    <form action="/media" className="grid grid-cols-1 gap-3 md:grid-cols-5">
-                        <div className="md:col-span-2">
-                            <label className="mb-1 block text-sm font-medium">Search</label>
+                    <form action="/media" className="grid grid-cols-1 gap-2 sm:gap-3 sm:grid-cols-2 md:grid-cols-5">
+                        <div className="sm:col-span-2">
+                            <label className="mb-1 block text-xs sm:text-sm font-medium">Search</label>
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Search className="absolute left-3 top-1/2 size-3 sm:size-4 -translate-y-1/2 text-muted-foreground" />
                                 <input
                                     name="searchTerm"
                                     placeholder="Search title, cast, director"
-                                    className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="h-9 sm:h-10 w-full rounded-md border bg-background pl-8 pr-3 text-xs sm:text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="mb-1 block text-sm font-medium">Genre</label>
-                            <select name="genre" className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <label className="mb-1 block text-xs sm:text-sm font-medium">Genre</label>
+                            <select name="genre" className="h-9 sm:h-10 w-full rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
                                 <option value="">All genres</option>
                                 {genres.map((genre) => (
                                     <option key={genre.id} value={genre.name}>{genre.name}</option>
@@ -133,7 +133,7 @@ export default async function Home() {
                             </select>
                         </div>
                         <div>
-                            <label className="mb-1 block text-sm font-medium">Platform</label>
+                            <label className="mb-1 block text-xs sm:text-sm font-medium">Platform</label>
                             <input
                                 name="streamingPlatform"
                                 placeholder="Netflix, Disney+"
@@ -141,7 +141,7 @@ export default async function Home() {
                             />
                         </div>
                         <div>
-                            <label className="mb-1 block text-sm font-medium">Release year</label>
+                            <label className="mb-1 block text-xs sm:text-sm font-medium">Release year</label>
                             <input
                                 name="releaseYear"
                                 type="number"
@@ -151,7 +151,7 @@ export default async function Home() {
                                 className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                             />
                         </div>
-                        <div className="md:col-span-5 flex flex-wrap gap-3">
+                        <div className="sm:col-span-2 md:col-span-5 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
                             <Button type="submit">Search Library</Button>
                             <Button type="button" variant="outline" asChild>
                                 <Link href="/media?sortBy=averageRating&sortOrder=desc">Explore Top Rated</Link>

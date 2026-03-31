@@ -81,22 +81,22 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
         : null);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
             {/* Hero */}
-            <div className="flex flex-col md:flex-row gap-8 mb-10">
-                <div className="shrink-0">
-                    <div className="relative aspect-2/3 w-48 overflow-hidden rounded-xl shadow-2xl md:w-64">
+            <div className="flex flex-col sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:flex-row">
+                <div className="shrink-0 mx-auto sm:mx-0">
+                    <div className="relative aspect-2/3 w-32 sm:w-40 md:w-48 lg:w-64 overflow-hidden rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl">
                         {media.posterUrl ? (
-                            <Image src={media.posterUrl} alt={media.title} fill className="object-cover" sizes="256px" />
+                            <Image src={media.posterUrl} alt={media.title} fill className="object-cover" sizes="(max-width: 640px) 128px, (max-width: 768px) 160px, (max-width: 1024px) 192px, 256px" />
                         ) : (
                             <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <Film className="size-12 text-muted-foreground" />
+                                <Film className="size-8 sm:size-10 md:size-12 text-muted-foreground" />
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="flex-1 space-y-4">
+                <div className="flex-1 space-y-3 sm:space-y-4">
                     <div>
                         <div className="flex flex-wrap items-center gap-2 mb-2">
                             <Badge variant={media.mediaType === "MOVIE" ? "default" : "secondary"} className="gap-1">
