@@ -99,4 +99,118 @@ Connection verification checklist
 One important security note
 - Your .env content in chat includes real secrets (Stripe, DB, OAuth, SMTP, JWT). Rotate them immediately in provider dashboards.
 
+Admin payments dashboard API contract
+
+Recommended primary route
+1. GET /api/v1/admin/payments/dashboard
+Purpose: admin-only payment analytics for the payments management page.
+
+Why this route
+1. The current frontend page is admin-scoped, so this should not be a generic /stats endpoint.
+2. Payment analytics should be isolated from unrelated admin dashboard metrics.
+3. A dedicated route avoids future contract drift and makes authorization clearer.
+
+Required auth
+1. Require authenticated ADMIN or SUPER_ADMIN.
+2. Return 401 if not logged in.
+3. Return 403 if logged in but not admin.
+
+Recommended query params
+1. period=30d | 90d | 12m
+Purpose: controls the analytics window.
+2. groupBy=day | month
+Purpose: controls chart bucket aggregation.
+
+Minimum response shape required by current frontend
+```json
+{
+	"success": true,
+	"statusCode": 200,
+	"message": "Payment dashboard fetched successfully",
+	"data": {
+		"paymentCount": 128,
+		"userCount": 64,
+		"totalRevenue": 5432.5,
+		"barChartData": [
+			{ "month": "2026-01-01T00:00:00.000Z", "count": 30 },
+			{ "month": "2026-02-01T00:00:00.000Z", "count": 42 },
+			{ "month": "2026-03-01T00:00:00.000Z", "count": 56 }
+		],
+		"pieChartData": [
+			{ "status": "PAID", "count": 120 },
+			{ "status": "PENDING", "count": 5 },
+			{ "status": "FAILED", "count": 3 }
+		]
+	}
+}
+```
+
+Field meanings
+1. paymentCount
+Purpose: total completed or finalized payment records in the selected period.
+2. userCount
+Purpose: distinct users who made payments in the selected period, or total platform users if that is what you want for revenue-per-user. Pick one rule and keep it stable.
+3. totalRevenue
+Purpose: sum of successful payment amounts.
+4. barChartData
+Purpose: time-series transaction counts. The frontend currently labels this as monthly trend, but it can support day or month buckets if the field name stays stable.
+5. pieChartData
+Purpose: grouped payment statuses for the “Payment Status Mix” card.
+
+Recommended status enum values
+1. PAID
+2. PENDING
+3. FAILED
+4. REFUNDED
+5. CANCELLED
+
+Recommended backend aggregation rules
+1. paymentCount should count only successful payments unless you explicitly want all attempts.
+2. totalRevenue should include only successful captured payments.
+3. pieChartData should include all tracked statuses, even if some counts are zero.
+4. barChartData should be sorted ascending by time.
+5. month should be an ISO string, even if the bucket is daily.
+
+Optional but useful response additions
+1. averagePaymentAmount
+Purpose: removes the need for frontend calculation.
+2. revenuePerUser
+Purpose: removes ambiguity around which userCount denominator is used.
+3. recentTransactions
+Purpose: lets the admin page show a latest-payments table later.
+
+Suggested recentTransactions shape
+```json
+{
+	"id": "txn_123",
+	"userId": "user_123",
+	"userName": "John Doe",
+	"userEmail": "john@example.com",
+	"amount": 49.99,
+	"currency": "USD",
+	"status": "PAID",
+	"source": "SUBSCRIPTION",
+	"sourceId": "sub_123",
+	"provider": "STRIPE",
+	"providerPaymentId": "pi_123",
+	"createdAt": "2026-03-31T08:00:00.000Z"
+}
+```
+
+Related existing route you can keep separately
+1. GET /api/v1/subscriptions/plans
+Purpose: frontend already uses this for rendering plan cards on the same page.
+
+Frontend connection note
+1. If you implement GET /api/v1/admin/payments/dashboard, the frontend service should stop guessing with /stats fallbacks and call only this route.
+2. The current page can already consume paymentCount, userCount, totalRevenue, barChartData, and pieChartData directly.
+
+Verification checklist for backend
+1. Admin can open /admin/dashboard/payments-management without 404.
+2. Non-admin gets 403.
+3. paymentCount matches the total of successful payment records.
+4. totalRevenue matches Stripe or stored transaction totals for successful payments.
+5. barChartData renders at least one bucket when payment data exists.
+6. pieChartData includes stable status labels and counts.
+
 Made changes.
