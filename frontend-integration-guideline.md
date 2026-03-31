@@ -213,4 +213,118 @@ Verification checklist for backend
 5. barChartData renders at least one bucket when payment data exists.
 6. pieChartData includes stable status labels and counts.
 
+## Implementation Status
+
+**COMPLETED**: GET /api/v1/admin/payments/dashboard
+
+Status: ✅ Live and tested
+- Route: `GET /api/v1/admin/payments/dashboard`
+- Auth: checkAuth(ADMIN, SUPER_ADMIN) - returns 403 if not admin
+- Response: Matches the exact shape specified above
+- Data aggregation:
+  - paymentCount: sum of completed Purchase records + active Subscription records
+  - userCount: distinct userId count from both payment types
+  - totalRevenue: sum of amount fields from completed payments
+  - barChartData: grouped by month (ISO string) with ascending sort
+  - pieChartData: status distribution (COMPLETED, PENDING, FAILED)
+
+Frontend service can now stop using the `/stats` fallback chain and call only `/admin/payments/dashboard`.
+
+Home page and media catalog API contract
+
+What the frontend now supports immediately
+1. Home page uses existing media listing for:
+- Top Rated This Week via `sortBy=averageRating`
+- Newly Added via `sortBy=createdAt`
+- Search + filters via `searchTerm`, `genre`, `streamingPlatform`, `releaseYear`
+2. Media catalog page uses:
+- `genre` filter
+- `streamingPlatform` filter
+- `releaseYear` filter
+- `minRating` filter
+- `sortBy=createdAt`
+- `sortBy=averageRating`
+- `sortBy=mostLiked` placeholder already wired on frontend
+
+Backend additions required to fully satisfy the requested pages
+
+1. Editor-curated and featured titles
+Recommended fields on media model
+1. `isFeatured: boolean`
+2. `isEditorPick: boolean`
+
+Recommended admin CRUD support
+1. `POST /api/v1/media`
+Accept optional fields:
+- `isFeatured`
+- `isEditorPick`
+2. `PATCH /api/v1/media/:id`
+Accept optional fields:
+- `isFeatured`
+- `isEditorPick`
+
+Recommended public catalog query params
+1. `GET /api/v1/media?featured=true`
+Purpose: homepage featured spotlight candidates.
+2. `GET /api/v1/media?editorPick=true`
+Purpose: homepage editor’s picks section.
+
+Recommended behavior
+1. Only published media should be returned on public pages.
+2. If `featured=true` is provided, return only featured published titles.
+3. If `editorPick=true` is provided, return only editor-picked published titles.
+4. Support combining these with `limit`, `page`, `sortBy`, `genre`, and `mediaType`.
+
+2. Most liked sorting for All Movie/Series page
+Recommended public route support
+1. `GET /api/v1/media?sortBy=mostLiked&sortOrder=desc`
+Purpose: sort titles by total likes across published reviews for that title.
+
+Aggregation rule for `mostLiked`
+1. For each media item, sum likes across all published reviews belonging to that media.
+2. Sort descending by that aggregated count.
+3. Break ties by `averageRating desc`, then `createdAt desc`.
+
+Recommended response additions on media list item
+```json
+{
+	"id": "media_123",
+	"title": "Inception",
+	"streamingPlatform": "Netflix",
+	"averageRating": 8.8,
+	"_count": {
+		"reviews": 42,
+		"likes": 315
+	},
+	"isFeatured": true,
+	"isEditorPick": true
+}
+```
+
+Why `_count.likes` matters
+1. It lets the catalog card show popularity context.
+2. It lets the frontend confirm the backend’s most-liked ordering.
+
+3. Media details admin moderation support
+Frontend behavior now expects this admin route to work on the media details page:
+1. `GET /api/v1/reviews/admin/media/:mediaId?page=1&limit=50`
+Purpose: fetch all review states for the current title when an admin is viewing the details page.
+
+Expected review item shape
+1. Include `status` on every review.
+2. Include `_count.likes` and `_count.comments`.
+3. Include user info for moderation context.
+
+4. Existing moderation actions used on media details page
+1. `PATCH /api/v1/reviews/:reviewId/approve`
+2. `PATCH /api/v1/reviews/:reviewId/unpublish`
+3. `DELETE /api/v1/reviews/:reviewId/admin`
+
+Verification checklist for these page requirements
+1. Home page featured spotlight changes when admin marks a title as featured.
+2. Home page editor’s picks section contains only editor-picked published titles.
+3. `/media?sortBy=mostLiked` returns titles ordered by total published review likes.
+4. Media cards include platform, average rating, and review count.
+5. Admin can open a media detail page and approve, unpublish, or delete a review inline.
+
 Made changes.

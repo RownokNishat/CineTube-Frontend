@@ -29,6 +29,18 @@ export async function getReviews(params?: ReviewQueryParams): Promise<ApiRespons
     return httpClient.get<Review[]>("/reviews", { params: params as Record<string, unknown> });
 }
 
+export async function getAdminMediaReviews(mediaId: string, params?: Omit<ReviewQueryParams, "mediaId">): Promise<ApiResponse<Review[]>> {
+    const queryParams = params ? { ...params } as Record<string, unknown> : {};
+
+    if (params?.sortBy) {
+        queryParams.sort = `${params.sortOrder === "asc" ? "" : "-"}${params.sortBy}`;
+        delete queryParams.sortBy;
+        delete queryParams.sortOrder;
+    }
+
+    return httpClient.get<Review[]>(`/reviews/admin/media/${mediaId}`, { params: queryParams });
+}
+
 export async function createReview(payload: CreateReviewPayload): Promise<ApiResponse<Review>> {
     const { mediaId, ...data } = payload;
     return httpClient.post<Review>(`/reviews/media/${mediaId}`, data);

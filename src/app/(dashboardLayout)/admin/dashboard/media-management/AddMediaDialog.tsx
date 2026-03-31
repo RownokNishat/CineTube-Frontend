@@ -23,6 +23,8 @@ const AddMediaDialog = () => {
     const [mediaType, setMediaType] = useState("MOVIE");
     const [pricingType, setPricingType] = useState("FREE");
     const [status, setStatus] = useState("DRAFT");
+    const [isFeatured, setIsFeatured] = useState(false);
+    const [isEditorPick, setIsEditorPick] = useState(false);
     const [selectedGenreIds, setSelectedGenreIds] = useState<string[]>([]);
     const [posterPreview, setPosterPreview] = useState<string | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
@@ -39,6 +41,8 @@ const AddMediaDialog = () => {
         setMediaType("MOVIE");
         setPricingType("FREE");
         setStatus("DRAFT");
+        setIsFeatured(false);
+        setIsEditorPick(false);
         setSelectedGenreIds([]);
         setPosterPreview(null);
         formRef.current?.reset();
@@ -63,6 +67,8 @@ const AddMediaDialog = () => {
         formData.set("mediaType", mediaType);
         formData.set("pricingType", pricingType);
         formData.set("status", status);
+        formData.set("isFeatured", String(isFeatured));
+        formData.set("isEditorPick", String(isEditorPick));
 
         // Backend expects cast as an array; split comma-separated string
         const castRaw = (formData.get("cast") as string) ?? "";
@@ -186,6 +192,32 @@ const AddMediaDialog = () => {
                                         <Label htmlFor="add-director">Director <span className="text-destructive">*</span></Label>
                                         <Input id="add-director" name="director" required placeholder="Director name" />
                                     </div>
+                                    <div className="col-span-2 grid gap-3 sm:grid-cols-2">
+                                        <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={isFeatured}
+                                                onChange={(e) => setIsFeatured(e.target.checked)}
+                                                className="mt-1"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">Featured Spotlight</p>
+                                                <p className="text-xs text-muted-foreground">Allows this title to power the homepage featured slot.</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={isEditorPick}
+                                                onChange={(e) => setIsEditorPick(e.target.checked)}
+                                                className="mt-1"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">Editor's Pick</p>
+                                                <p className="text-xs text-muted-foreground">Includes this title in the curated editor picks collection.</p>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                             </section>
 
@@ -209,7 +241,7 @@ const AddMediaDialog = () => {
                                         <Label htmlFor="add-trailer">
                                             Trailer URL <span className="text-muted-foreground text-xs font-normal">(optional)</span>
                                         </Label>
-                                        <Input id="add-trailer" name="trailer" type="url" placeholder="https://youtube.com/watch?v=…" />
+                                        <Input id="add-trailer" name="trailerUrl" type="url" placeholder="https://youtube.com/watch?v=…" />
                                     </div>
                                 </div>
                             </section>

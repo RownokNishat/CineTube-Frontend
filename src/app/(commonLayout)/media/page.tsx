@@ -18,6 +18,8 @@ interface MediaPageProps {
         releaseYear?: string;
         minRating?: string;
         popularity?: string;
+        featured?: string;
+        editorPick?: string;
         sortBy?: string;
         sortOrder?: string;
     }>;
@@ -42,6 +44,8 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
             releaseYear: Number.isFinite(parsedReleaseYear) ? parsedReleaseYear : undefined,
             minRating: Number.isFinite(parsedMinRating) ? parsedMinRating : undefined,
             popularity: params.popularity,
+            featured: params.featured === "true" ? true : undefined,
+            editorPick: params.editorPick === "true" ? true : undefined,
             sortBy: params.sortBy,
             sortOrder: (params.sortOrder ?? "desc") as "asc" | "desc",
         }).catch(() => ({ data: [], meta: undefined, success: true, message: "" })),
@@ -63,6 +67,8 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
         if (params.releaseYear) sp.set("releaseYear", params.releaseYear);
         if (params.minRating) sp.set("minRating", params.minRating);
         if (params.popularity) sp.set("popularity", params.popularity);
+        if (params.featured) sp.set("featured", params.featured);
+        if (params.editorPick) sp.set("editorPick", params.editorPick);
         if (params.sortBy) sp.set("sortBy", params.sortBy);
         if (params.sortOrder) sp.set("sortOrder", params.sortOrder);
         sp.set("page", String(p));

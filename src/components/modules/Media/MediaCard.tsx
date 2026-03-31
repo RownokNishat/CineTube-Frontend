@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Media } from "@/types/media.types";
-import { Star } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -39,6 +39,13 @@ const MediaCard = ({ media }: MediaCardProps) => {
                             <Star className="size-3 fill-yellow-400 text-yellow-400" />
                             <span>{media.averageRating?.toFixed(1) ?? "—"}</span>
                         </div>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                        <span className="truncate">{media.streamingPlatform || "Platform TBA"}</span>
+                        <span className="inline-flex items-center gap-1 shrink-0">
+                            <MessageCircle className="size-3" />
+                            {media._count?.reviews ?? 0}
+                        </span>
                     </div>
                     {media.genres && media.genres.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">

@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createCommentAction, createReviewAction, deleteReviewAction, getCommentsAction, likeReviewAction, unlikeReviewAction, updateReviewAction } from "@/app/_actions/review.actions";
+import { adminDeleteReviewAction, approveReviewAction, unpublishReviewAction } from "@/app/(dashboardLayout)/admin/dashboard/reviews-management/_action";
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,16 +21,19 @@ interface ReviewSectionProps {
     initialReviews: Review[];
     isLoggedIn: boolean;
     userId?: string;
+    isAdmin?: boolean;
 }
 
 const ReviewCard = ({
     review,
     userId,
+    isAdmin,
     onReviewUpdated,
     onReviewDeleted,
 }: {
     review: Review;
     userId?: string;
+    isAdmin?: boolean;
     onReviewUpdated: (updatedReview: Review) => void;
     onReviewDeleted: (reviewId: string) => void;
 }) => {
@@ -47,6 +51,7 @@ const ReviewCard = ({
     const [editSpoiler, setEditSpoiler] = useState(review.isSpoiler);
     const [savingEdit, setSavingEdit] = useState(false);
     const [deletingReview, setDeletingReview] = useState(false);
+    const [moderating, setModerating] = useState(false);
 
     const isOwnUnpublished = !!userId && review.userId === userId && review.status !== "PUBLISHED";
 
@@ -154,6 +159,42 @@ const ReviewCard = ({
         }
     };
 
+    const handleAdminModeration = async (action: "approve" | "unpublish" | "delete") => {
+        if (action === "delete" && !confirm("Delete this review permanently?")) return;
+
+        setModerating(true);
+        try {
+            const result = action === "approve"
+                ? await approveReviewAction(review.id)
+                : action === "unpublish"
+                    ? await unpublishReviewAction(review.id)
+                    : await adminDeleteReviewAction(review.id);
+
+            if (!result.success) {
+                toast.error(result.message || "Moderation action failed");
+                return;
+            }
+
+            if (action === "delete") {
+                onReviewDeleted(review.id);
+            } else if ("data" in result && result.data) {
+                onReviewUpdated(result.data);
+            }
+
+            toast.success(
+                action === "approve"
+                    ? "Review approved"
+                    : action === "unpublish"
+                        ? "Review unpublished"
+                        : "Review deleted"
+            );
+        } catch {
+            toast.error("Moderation action failed");
+        } finally {
+            setModerating(false);
+        }
+    };
+
     return (
         <Card>
             <CardContent className="pt-4 space-y-3">
@@ -175,6 +216,34 @@ const ReviewCard = ({
                         <span className="text-sm font-bold">{review.rating}/10</span>
                     </div>
                 </div>
+
+                {isAdmin && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant={review.status === "PUBLISHED" ? "default" : review.status === "PENDING" ? "secondary" : "outline"} className="text-[11px]">
+                            {review.status}
+                        </Badge>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => handleAdminModeration(review.status === "PUBLISHED" ? "unpublish" : "approve")}
+                            disabled={moderating}
+                        >
+                            {review.status === "PUBLISHED" ? "Unpublish" : "Approve"}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => handleAdminModeration("delete")}
+                            disabled={moderating}
+                        >
+                            Delete Review
+                        </Button>
+                    </div>
+                )}
 
                 {review.isSpoiler && (
                     <Badge variant="destructive" className="text-xs">Contains Spoilers</Badge>
@@ -267,7 +336,7 @@ const ReviewCard = ({
     );
 };
 
-const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId }: ReviewSectionProps) => {
+const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId, isAdmin }: ReviewSectionProps) => {
     const [reviews, setReviews] = useState<Review[]>(initialReviews);
     const [rating, setRating] = useState(7);
     const [content, setContent] = useState("");
@@ -344,6 +413,7 @@ const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId }: ReviewSe
                                 key={review.id}
                                 review={review}
                                 userId={userId}
+                                isAdmin={isAdmin}
                                 onReviewUpdated={(updatedReview) => {
                                     setReviews((prev) => prev.map((r) => (r.id === updatedReview.id ? updatedReview : r)));
                                 }}

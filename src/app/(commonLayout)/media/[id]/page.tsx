@@ -4,7 +4,7 @@ import PurchaseButton from "@/components/modules/Media/PurchaseButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getMediaById, getUserMediaAccess, verifyMediaPurchase } from "@/services/media.services";
-import { getReviews } from "@/services/review.services";
+import { getAdminMediaReviews, getReviews } from "@/services/review.services";
 import { getWatchlist } from "@/services/watchlist.services";
 import { getUserInfo } from "@/services/auth.services";
 import { Calendar, Clock, ExternalLink, Film, Star, Tv, Users } from "lucide-react";
@@ -22,13 +22,19 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
     const query = await searchParams;
     const purchaseSessionId = query.session_id || query.purchase_session;
 
-    const [mediaRes, reviewsRes, user] = await Promise.all([
+    const [mediaRes, user] = await Promise.all([
         getMediaById(id).catch(() => null),
-        getReviews({ mediaId: id, limit: 20 }).catch(() => ({ data: [] })),
         getUserInfo().catch(() => null),
     ]);
 
     if (!mediaRes) notFound();
+
+    const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
+    const reviewsRes = await (isAdmin
+        ? getAdminMediaReviews(id, { limit: 50 }).catch(() => ({ data: [] }))
+        : getReviews({ mediaId: id, limit: 20 }).catch(() => ({ data: [] }))
+    );
 
     const media = mediaRes.data;
     const reviews = reviewsRes.data ?? [];
@@ -184,6 +190,7 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
                 initialReviews={reviews}
                 isLoggedIn={!!user}
                 userId={user?.id}
+                isAdmin={isAdmin}
             />
         </div>
     );

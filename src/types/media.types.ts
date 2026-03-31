@@ -22,8 +22,11 @@ export interface Media {
     genres: Genre[];
     _count?: {
         reviews: number;
+        likes?: number;
     };
     averageRating?: number;
+    isFeatured?: boolean;
+    isEditorPick?: boolean;
 }
 
 export interface MediaQueryParams {
@@ -37,6 +40,8 @@ export interface MediaQueryParams {
     releaseYear?: number;
     minRating?: number;
     popularity?: string;
+    featured?: boolean;
+    editorPick?: boolean;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
 }

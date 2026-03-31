@@ -27,6 +27,8 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
     const [mediaType, setMediaType] = useState<string>(media.mediaType);
     const [pricingType, setPricingType] = useState<string>(media.pricingType);
     const [status, setStatus] = useState<string>(media.status);
+    const [isFeatured, setIsFeatured] = useState<boolean>(media.isFeatured ?? false);
+    const [isEditorPick, setIsEditorPick] = useState<boolean>(media.isEditorPick ?? false);
     const [selectedGenreIds, setSelectedGenreIds] = useState<string[]>(
         media.genres?.map((g) => g.id) ?? []
     );
@@ -40,6 +42,8 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
             setMediaType(media.mediaType);
             setPricingType(media.pricingType);
             setStatus(media.status);
+            setIsFeatured(media.isFeatured ?? false);
+            setIsEditorPick(media.isEditorPick ?? false);
             setSelectedGenreIds(media.genres?.map((g) => g.id) ?? []);
             setPosterPreview(media.posterUrl ?? null);
         }
@@ -65,6 +69,8 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
         formData.set("mediaType", mediaType);
         formData.set("pricingType", pricingType);
         formData.set("status", status);
+        formData.set("isFeatured", String(isFeatured));
+        formData.set("isEditorPick", String(isEditorPick));
 
         const castRaw = (formData.get("cast") as string) ?? "";
         formData.delete("cast");
@@ -181,6 +187,32 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
                                         <Label htmlFor="edit-director">Director <span className="text-destructive">*</span></Label>
                                         <Input id="edit-director" name="director" required defaultValue={media.director} placeholder="Director name" />
                                     </div>
+                                    <div className="col-span-2 grid gap-3 sm:grid-cols-2">
+                                        <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={isFeatured}
+                                                onChange={(e) => setIsFeatured(e.target.checked)}
+                                                className="mt-1"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">Featured Spotlight</p>
+                                                <p className="text-xs text-muted-foreground">Use this title as a candidate for the homepage featured slot.</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={isEditorPick}
+                                                onChange={(e) => setIsEditorPick(e.target.checked)}
+                                                className="mt-1"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">Editor's Pick</p>
+                                                <p className="text-xs text-muted-foreground">Include this title in the curated editor picks row.</p>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                             </section>
 
@@ -204,7 +236,7 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
                                         <Label htmlFor="edit-trailer">
                                             Trailer URL <span className="text-muted-foreground text-xs font-normal">(optional)</span>
                                         </Label>
-                                        <Input id="edit-trailer" name="trailer" type="url" defaultValue={media.trailerUrl ?? ""} placeholder="https://youtube.com/watch?v=…" />
+                                        <Input id="edit-trailer" name="trailerUrl" type="url" defaultValue={media.trailerUrl ?? ""} placeholder="https://youtube.com/watch?v=…" />
                                     </div>
                                 </div>
                             </section>

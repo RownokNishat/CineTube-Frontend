@@ -97,6 +97,7 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
                 <SelectContent>
                     <SelectItem value="createdAt">Latest</SelectItem>
                     <SelectItem value="averageRating">Top Rated</SelectItem>
+                    <SelectItem value="mostLiked">Most Liked</SelectItem>
                     <SelectItem value="reviewCount">Most Reviewed</SelectItem>
                     <SelectItem value="popularity">Most Popular</SelectItem>
                     <SelectItem value="releaseYear">Release Year</SelectItem>
