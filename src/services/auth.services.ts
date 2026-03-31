@@ -1,5 +1,6 @@
 "use server";
 
+import { isDynamicServerUsageError } from "@/lib/isDynamicServerUsageError";
 import { setCookie } from "@/lib/cookieUtils";
 import { cookies } from "next/headers";
 
@@ -72,6 +73,10 @@ export async function getUserInfo() {
         const { data } = await res.json();
         return data;
     } catch (error) {
+        if (isDynamicServerUsageError(error)) {
+            return null;
+        }
+
         console.error("Error fetching user info:", error);
         return null;
     }
