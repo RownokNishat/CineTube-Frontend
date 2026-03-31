@@ -24,7 +24,7 @@ interface ReviewSectionProps {
 
 const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => {
     const [likes, setLikes] = useState(review._count?.likes ?? 0);
-    const [liked, setLiked] = useState(review.isLiked ?? false);
+    const [liked, setLiked] = useState(review.likedByMe ?? review.isLiked ?? false);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentText, setCommentText] = useState("");

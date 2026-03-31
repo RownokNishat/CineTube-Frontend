@@ -22,6 +22,7 @@ export interface Review {
         likes: number;
         comments: number;
     };
+    likedByMe?: boolean;
     isLiked?: boolean;
 }
 
@@ -60,6 +61,7 @@ export interface Comment {
         replies: number;
     };
     replies?: Comment[];
+    likedByMe?: boolean;
     isLiked?: boolean;
 }
 
