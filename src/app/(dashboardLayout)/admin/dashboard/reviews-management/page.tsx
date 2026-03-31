@@ -1,3 +1,4 @@
+import AutoFilterForm from "@/components/shared/AutoFilterForm";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -103,7 +104,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
             {!mediaId && (
                 <Card>
                     <CardContent className="p-4">
-                        <form className="mb-4 flex flex-col gap-3 sm:flex-row">
+                        <AutoFilterForm className="mb-4 flex flex-col gap-3 sm:flex-row">
                             <Input
                                 type="search"
                                 name="searchTerm"
@@ -112,14 +113,13 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                                 className="sm:max-w-md"
                             />
                             <div className="flex gap-2">
-                                <Button type="submit">Search</Button>
                                 {searchTerm && (
                                     <Button type="button" variant="outline" asChild>
                                         <Link href="/admin/dashboard/reviews-management">Reset</Link>
                                     </Button>
                                 )}
                             </div>
-                        </form>
+                        </AutoFilterForm>
 
                         {mediaCatalog.length > 0 ? (
                             <div className="space-y-2">
@@ -168,7 +168,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
             {mediaId && (
             <Card>
                 <CardContent className="space-y-4 p-4">
-                    <form className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <AutoFilterForm className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                             <Input
                                 type="search"
@@ -189,7 +189,6 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                             </select>
                         </div>
                         <div className="flex gap-2">
-                            <Button type="submit">Apply</Button>
                             <Button type="button" variant="outline" asChild>
                                 <Link href={`/admin/dashboard/reviews-management?mediaId=${mediaId}&status=PENDING`}>
                                     Reset
@@ -199,7 +198,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                                 <Link href="/admin/dashboard/reviews-management">Change Media</Link>
                             </Button>
                         </div>
-                    </form>
+                    </AutoFilterForm>
 
                     <Table>
                         <TableHeader>

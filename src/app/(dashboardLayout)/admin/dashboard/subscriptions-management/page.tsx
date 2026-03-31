@@ -1,3 +1,4 @@
+import AutoFilterForm from "@/components/shared/AutoFilterForm";
 import SubscriptionPlanEditor from "./SubscriptionPlanEditor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +56,7 @@ export default async function SubscriptionsManagementPage({ searchParams }: Subs
 
             <Card>
                 <CardContent className="p-4">
-                    <form className="flex flex-col gap-3 sm:flex-row">
+                    <AutoFilterForm className="flex flex-col gap-3 sm:flex-row">
                         <Input
                             type="search"
                             name="searchTerm"
@@ -64,12 +65,11 @@ export default async function SubscriptionsManagementPage({ searchParams }: Subs
                             className="sm:max-w-sm"
                         />
                         <div className="flex gap-2">
-                            <Button type="submit">Search</Button>
                             <Button type="button" variant="outline" asChild>
                                 <Link href="/admin/dashboard/subscriptions-management">Reset</Link>
                             </Button>
                         </div>
-                    </form>
+                    </AutoFilterForm>
                 </CardContent>
             </Card>
 

@@ -1,3 +1,4 @@
+import AutoFilterForm from "@/components/shared/AutoFilterForm";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,7 +46,7 @@ export default async function GenresManagementPage({ searchParams }: GenresManag
                     <CardTitle className="text-lg">Existing Genres</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form className="mb-4 flex flex-col gap-3 sm:flex-row">
+                    <AutoFilterForm className="mb-4 flex flex-col gap-3 sm:flex-row">
                         <Input
                             type="search"
                             name="searchTerm"
@@ -54,14 +55,13 @@ export default async function GenresManagementPage({ searchParams }: GenresManag
                             className="sm:max-w-sm"
                         />
                         <div className="flex gap-2">
-                            <Button type="submit">Search</Button>
                             {params.searchTerm && (
                                 <Button type="button" variant="outline" asChild>
                                     <Link href="/admin/dashboard/genres-management">Reset</Link>
                                 </Button>
                             )}
                         </div>
-                    </form>
+                    </AutoFilterForm>
 
                     <div className="flex flex-wrap gap-2">
                         {filteredGenres.map((g) => (

@@ -1,3 +1,4 @@
+import AutoFilterForm from "@/components/shared/AutoFilterForm";
 import StatsCard from "@/components/shared/StatsCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +80,7 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <form className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <AutoFilterForm className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Input
                 type="search"
@@ -105,7 +106,6 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit">Apply</Button>
               <Button type="button" variant="outline" asChild>
                 <Link href="/admin/dashboard/payments-management">Reset</Link>
               </Button>
@@ -113,7 +113,7 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
                 <Link href="/admin/dashboard/subscriptions-management">Manage Plans</Link>
               </Button>
             </div>
-          </form>
+          </AutoFilterForm>
         </CardContent>
       </Card>
 

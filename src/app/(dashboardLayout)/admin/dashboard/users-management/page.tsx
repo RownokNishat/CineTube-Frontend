@@ -1,3 +1,4 @@
+import AutoFilterForm from "@/components/shared/AutoFilterForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,7 +49,7 @@ export default async function UsersManagementPage({ searchParams }: UsersManagem
 
             <Card>
                 <CardContent className="space-y-4 p-4">
-                    <form className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <AutoFilterForm className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                             <Input
                                 type="search"
@@ -79,12 +80,11 @@ export default async function UsersManagementPage({ searchParams }: UsersManagem
                             </select>
                         </div>
                         <div className="flex gap-2">
-                            <Button type="submit">Apply</Button>
                             <Button type="button" variant="outline" asChild>
                                 <Link href="/admin/dashboard/users-management">Reset</Link>
                             </Button>
                         </div>
-                    </form>
+                    </AutoFilterForm>
 
                     <Table>
                         <TableHeader>
