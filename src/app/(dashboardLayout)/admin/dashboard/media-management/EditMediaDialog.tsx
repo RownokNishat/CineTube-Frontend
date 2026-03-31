@@ -26,6 +26,7 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
     const [loading, setLoading] = useState(false);
     const [mediaType, setMediaType] = useState<string>(media.mediaType);
     const [pricingType, setPricingType] = useState<string>(media.pricingType);
+    const [price, setPrice] = useState<string>(String(media.price ?? 9.99));
     const [status, setStatus] = useState<string>(media.status);
     const [isFeatured, setIsFeatured] = useState<boolean>(media.isFeatured ?? false);
     const [isEditorPick, setIsEditorPick] = useState<boolean>(media.isEditorPick ?? false);
@@ -41,6 +42,7 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
             getGenres().then((res) => setGenres(res.data ?? [])).catch(() => {});
             setMediaType(media.mediaType);
             setPricingType(media.pricingType);
+            setPrice(String(media.price ?? 9.99));
             setStatus(media.status);
             setIsFeatured(media.isFeatured ?? false);
             setIsEditorPick(media.isEditorPick ?? false);
@@ -71,6 +73,17 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
         formData.set("status", status);
         formData.set("isFeatured", String(isFeatured));
         formData.set("isEditorPick", String(isEditorPick));
+
+        if (pricingType === "PREMIUM") {
+            const parsedPrice = Number(price);
+            if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+                toast.error("Premium media price must be greater than 0");
+                return;
+            }
+            formData.set("price", String(parsedPrice));
+        } else {
+            formData.set("price", "0");
+        }
 
         const castRaw = (formData.get("cast") as string) ?? "";
         formData.delete("cast");
@@ -168,6 +181,19 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
                                                 <SelectItem value="PREMIUM">Premium</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="edit-price">Price (USD)</Label>
+                                        <Input
+                                            id="edit-price"
+                                            name="price"
+                                            type="number"
+                                            value={pricingType === "FREE" ? "0" : price}
+                                            onChange={(e) => setPrice(e.target.value)}
+                                            min={0}
+                                            step="0.01"
+                                            disabled={pricingType === "FREE"}
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label htmlFor="edit-year">Release Year <span className="text-destructive">*</span></Label>

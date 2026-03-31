@@ -1,6 +1,7 @@
 import { getUserInfo } from "@/services/auth.services";
 import { getWatchlist } from "@/services/watchlist.services";
 import { getMySubscription } from "@/services/subscription.services";
+import { getMyReviews } from "@/services/review.services";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,16 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function UserDashboard() {
-    const [user, watchlistRes, subscriptionRes] = await Promise.all([
+    const [user, watchlistRes, subscriptionRes, myReviewsRes] = await Promise.all([
         getUserInfo().catch(() => null),
         getWatchlist().catch(() => ({ data: [] })),
         getMySubscription().catch(() => ({ data: null })),
+        getMyReviews({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
     ]);
 
     const watchlist = watchlistRes.data ?? [];
     const subscription = subscriptionRes.data;
+    const reviewCount = (myReviewsRes as { meta?: { total?: number } }).meta?.total ?? 0;
 
     return (
         <div className="space-y-6">
@@ -46,7 +49,7 @@ export default async function UserDashboard() {
                             <Star className="size-6 text-yellow-500" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">—</p>
+                            <p className="text-2xl font-bold">{reviewCount}</p>
                             <p className="text-sm text-muted-foreground">Reviews Written</p>
                         </div>
                     </CardContent>

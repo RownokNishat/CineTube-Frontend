@@ -84,7 +84,7 @@ export default async function Home() {
                         <Button size="lg" asChild>
                             <Link href="/media">Browse All <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>
-                        <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-black" asChild>
+                        <Button size="lg" variant="outline" className="border-white/90 bg-white text-gray-900 hover:bg-gray-100 hover:text-black" asChild>
                             <Link href="/register">Join Free</Link>
                         </Button>
                     </div>

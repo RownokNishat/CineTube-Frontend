@@ -17,7 +17,7 @@ const Navbar = async () => {
                     <span className="hidden sm:inline">CineTube</span>
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-xs sm:text-sm flex-1 ml-4\">
+                <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm flex-1 ml-8 lg:ml-12\">
                     <Link href="/media" className="text-muted-foreground hover:text-foreground transition-colors">Movies &amp; Series</Link>
                     <Link href="/media?mediaType=MOVIE" className="text-muted-foreground hover:text-foreground transition-colors">Movies</Link>
                     <Link href="/media?mediaType=SERIES" className="text-muted-foreground hover:text-foreground transition-colors">Series</Link>
