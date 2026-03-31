@@ -35,6 +35,7 @@ export interface MediaQueryParams {
     searchTerm?: string;
     mediaType?: "MOVIE" | "SERIES";
     pricingType?: "FREE" | "PREMIUM";
+    status?: "DRAFT" | "PUBLISHED";
     genre?: string;
     streamingPlatform?: string;
     releaseYear?: number;

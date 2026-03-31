@@ -1,8 +1,12 @@
 export interface SubscriptionPlan {
     plan: "FREE" | "MONTHLY" | "YEARLY";
+    label?: string;
     price: number;
     duration: string;
+    durationDays?: number;
+    currency?: string;
     features: string[];
+    isActive?: boolean;
 }
 
 export interface Subscription {

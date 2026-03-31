@@ -1,10 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getMediaList } from "@/services/media.services";
 import { Film, Plus } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import DeleteMediaButton from "./DeleteMediaButton";
 import AddMediaDialog from "./AddMediaDialog";
 import EditMediaDialog from "./EditMediaDialog";
@@ -12,17 +14,37 @@ import EditMediaDialog from "./EditMediaDialog";
 export const dynamic = "force-dynamic";
 
 interface MediaManagementPageProps {
-    searchParams: Promise<{ page?: string }>;
+    searchParams: Promise<{
+        page?: string;
+        searchTerm?: string;
+        pricingType?: string;
+        status?: string;
+    }>;
 }
 
 export default async function MediaManagementPage({ searchParams }: MediaManagementPageProps) {
     const params = await searchParams;
     const page = Number(params.page ?? 1);
+    const searchTerm = params.searchTerm?.trim();
+    const pricingType = params.pricingType === "FREE" || params.pricingType === "PREMIUM"
+        ? params.pricingType
+        : undefined;
+    const status = params.status === "DRAFT" || params.status === "PUBLISHED"
+        ? params.status
+        : undefined;
 
     let mediaList: Awaited<ReturnType<typeof getMediaList>>["data"] = [];
     let total = 0;
     try {
-        const res = await getMediaList({ page, limit: 15, sortBy: "createdAt", sortOrder: "desc" });
+        const res = await getMediaList({
+            page,
+            limit: 15,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+            searchTerm,
+            pricingType,
+            status,
+        });
         mediaList = res.data ?? [];
         total = res.meta?.total ?? 0;
     } catch { /* empty */ }
@@ -38,7 +60,43 @@ export default async function MediaManagementPage({ searchParams }: MediaManagem
             </div>
 
             <Card>
-                <CardContent className="p-0">
+                <CardContent className="space-y-4 p-4">
+                    <form className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <Input
+                                type="search"
+                                name="searchTerm"
+                                defaultValue={searchTerm ?? ""}
+                                placeholder="Search media by title, director, or synopsis"
+                                className="sm:w-80"
+                            />
+                            <select
+                                name="pricingType"
+                                defaultValue={pricingType ?? ""}
+                                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                            >
+                                <option value="">All pricing</option>
+                                <option value="FREE">Free</option>
+                                <option value="PREMIUM">Premium</option>
+                            </select>
+                            <select
+                                name="status"
+                                defaultValue={status ?? ""}
+                                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                            >
+                                <option value="">All status</option>
+                                <option value="PUBLISHED">Published</option>
+                                <option value="DRAFT">Draft</option>
+                            </select>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button type="submit">Apply</Button>
+                            <Button type="button" variant="outline" asChild>
+                                <Link href="/admin/dashboard/media-management">Reset</Link>
+                            </Button>
+                        </div>
+                    </form>
+
                     <Table>
                         <TableHeader>
                             <TableRow>

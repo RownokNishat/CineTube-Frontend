@@ -1,11 +1,13 @@
 import StatsCard from "@/components/shared/StatsCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { getPaymentDashboardData, getPaymentTransactions } from "@/services/dashboard.services";
-import { getSubscriptionPlans } from "@/services/subscription.services";
 import { format } from "date-fns";
 import { AlertCircle, CreditCard } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -16,14 +18,25 @@ const formatCurrency = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value);
 
-const PaymentsManagementPage = async () => {
-  const [analyticsResponse, transactionsResponse, plansResponse] = await Promise.all([
+interface PaymentsManagementPageProps {
+  searchParams: Promise<{ searchTerm?: string; type?: string; status?: string }>;
+}
+
+const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPageProps) => {
+  const params = await searchParams;
+  const searchTerm = params.searchTerm?.trim().toLowerCase() ?? "";
+  const typeFilter = params.type === "PURCHASE" || params.type === "SUBSCRIPTION" ? params.type : "";
+  const statusFilter = params.status?.trim().toUpperCase() ?? "";
+
+  const [analyticsResponse, transactionsResponse] = await Promise.all([
     getPaymentDashboardData(30),
-    getPaymentTransactions(1, 15),
-    getSubscriptionPlans().catch((error) => ({
-      success: false as const,
-      message: error instanceof Error ? error.message : "Failed to load plans",
-    })),
+    getPaymentTransactions({
+      page: 1,
+      limit: 100,
+      searchTerm: params.searchTerm,
+      type: typeFilter || undefined,
+      status: params.status,
+    }),
   ]);
 
   const hasAnalytics = analyticsResponse.success && !!analyticsResponse.data;
@@ -54,7 +67,6 @@ const PaymentsManagementPage = async () => {
   }));
 
   const transactions = transactionsResponse.success ? transactionsResponse.data : [];
-  const plans = plansResponse.success ? plansResponse.data : [];
 
   return (
     <div className="space-y-6">
@@ -64,6 +76,46 @@ const PaymentsManagementPage = async () => {
           Monitor overall transaction volume and revenue performance.
         </p>
       </div>
+
+      <Card>
+        <CardContent className="space-y-4 p-4">
+          <form className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Input
+                type="search"
+                name="searchTerm"
+                defaultValue={params.searchTerm ?? ""}
+                placeholder="Search by user, media, plan, or status"
+                className="sm:w-80"
+              />
+              <select
+                name="type"
+                defaultValue={typeFilter}
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              >
+                <option value="">All types</option>
+                <option value="PURCHASE">Purchase</option>
+                <option value="SUBSCRIPTION">Subscription</option>
+              </select>
+              <Input
+                name="status"
+                defaultValue={params.status ?? ""}
+                placeholder="Status e.g. COMPLETED"
+                className="sm:w-52"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit">Apply</Button>
+              <Button type="button" variant="outline" asChild>
+                <Link href="/admin/dashboard/payments-management">Reset</Link>
+              </Button>
+              <Button type="button" variant="secondary" asChild>
+                <Link href="/admin/dashboard/subscriptions-management">Manage Plans</Link>
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       {!hasAnalytics && (
         <Alert>
@@ -234,32 +286,16 @@ const PaymentsManagementPage = async () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Subscription Plans</CardTitle>
+          <CardTitle>Subscriptions</CardTitle>
         </CardHeader>
-        <CardContent>
-          {plans.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No subscription plan data is available.</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {plans.map((plan) => (
-                <div key={plan.plan} className="rounded-lg border p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2 font-medium">
-                      <CreditCard className="size-4 text-muted-foreground" />
-                      <span>{plan.plan}</span>
-                    </div>
-                    <Badge variant="secondary">{plan.duration ?? "Custom"}</Badge>
-                  </div>
-                  <p className="mb-3 text-2xl font-semibold">{formatCurrency(Number(plan.price || 0))}</p>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    {(plan.features ?? []).map((feature) => (
-                      <p key={feature}>{feature}</p>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <CreditCard className="size-4" />
+            <span>Subscription plan configuration has been moved to a dedicated admin page.</span>
+          </div>
+          <Button asChild>
+            <Link href="/admin/dashboard/subscriptions-management">Open Subscription Management</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

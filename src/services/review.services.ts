@@ -6,6 +6,7 @@ export interface ReviewQueryParams {
     mediaId?: string;
     page?: number;
     limit?: number;
+    searchTerm?: string;
     status?: "PENDING" | "PUBLISHED" | "UNPUBLISHED";
     sortBy?: string;
     sortOrder?: "asc" | "desc";

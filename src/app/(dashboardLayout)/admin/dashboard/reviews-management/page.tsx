@@ -2,7 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { getMediaReviewStats, getReviewById, getReviews } from "@/services/review.services";
+import { Input } from "@/components/ui/input";
+import { getAdminMediaReviews, getMediaReviewStats, getReviewById } from "@/services/review.services";
 import { getMediaList } from "@/services/media.services";
 import { Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -13,22 +14,37 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 interface ReviewsManagementPageProps {
-    searchParams: Promise<{ page?: string; mediaId?: string }>;
+    searchParams: Promise<{
+        page?: string;
+        mediaId?: string;
+        searchTerm?: string;
+        status?: string;
+    }>;
 }
 
 const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProps) => {
     const params = await searchParams;
     const page = Number(params.page ?? 1);
     const mediaId = params.mediaId;
+    const searchTerm = params.searchTerm?.trim();
+    const selectedStatus = params.status === "PUBLISHED" || params.status === "UNPUBLISHED"
+        ? params.status
+        : "PENDING";
+    const statusLabel = selectedStatus.toLowerCase();
 
-    let reviews: Awaited<ReturnType<typeof getReviews>>["data"] = [];
+    let reviews: Awaited<ReturnType<typeof getAdminMediaReviews>>["data"] = [];
     let total = 0;
     let stats: ReviewStats | null = null;
     let mediaCatalog: Awaited<ReturnType<typeof getMediaList>>["data"] = [];
 
     if (!mediaId) {
         try {
-            const mediaRes = await getMediaList({ limit: 50, sortBy: "createdAt", sortOrder: "desc" });
+            const mediaRes = await getMediaList({
+                limit: 50,
+                sortBy: "createdAt",
+                sortOrder: "desc",
+                searchTerm,
+            });
             mediaCatalog = mediaRes.data ?? [];
         } catch {
             mediaCatalog = [];
@@ -46,18 +62,18 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
 
     try {
         if (mediaId) {
-            const res = await getReviews({
-                mediaId,
+            const res = await getAdminMediaReviews(mediaId, {
                 page,
                 limit: 20,
-                status: "PENDING",
+                searchTerm,
+                status: selectedStatus,
                 sortBy: "createdAt",
                 sortOrder: "desc",
             });
             reviews = res.data ?? [];
             total = res.meta?.total ?? 0;
 
-            if (reviews.length === 0 && stats?.pendingReviews?.length) {
+            if (selectedStatus === "PENDING" && reviews.length === 0 && stats?.pendingReviews?.length) {
                 const reviewDetails = await Promise.all(
                     stats.pendingReviews.map(async (pendingReview) => {
                         try {
@@ -79,12 +95,32 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2"><Star className="size-6" /> Reviews Management</h1>
-                <p className="text-muted-foreground">{mediaId ? `${total} pending reviews` : "Select a media title to moderate reviews"}</p>
+                <p className="text-muted-foreground">
+                    {mediaId ? `${total} ${statusLabel} reviews` : "Select a media title to moderate reviews"}
+                </p>
             </div>
 
             {!mediaId && (
                 <Card>
                     <CardContent className="p-4">
+                        <form className="mb-4 flex flex-col gap-3 sm:flex-row">
+                            <Input
+                                type="search"
+                                name="searchTerm"
+                                defaultValue={searchTerm ?? ""}
+                                placeholder="Search media by title, director, or synopsis"
+                                className="sm:max-w-md"
+                            />
+                            <div className="flex gap-2">
+                                <Button type="submit">Search</Button>
+                                {searchTerm && (
+                                    <Button type="button" variant="outline" asChild>
+                                        <Link href="/admin/dashboard/reviews-management">Reset</Link>
+                                    </Button>
+                                )}
+                            </div>
+                        </form>
+
                         {mediaCatalog.length > 0 ? (
                             <div className="space-y-2">
                                 {mediaCatalog.map((media) => (
@@ -96,7 +132,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                                             </p>
                                         </div>
                                         <Button asChild size="sm" variant="outline">
-                                            <Link href={`/admin/dashboard/reviews-management?mediaId=${media.id}`}>
+                                            <Link href={`/admin/dashboard/reviews-management?mediaId=${media.id}&status=${selectedStatus}`}>
                                                 Manage Reviews
                                             </Link>
                                         </Button>
@@ -131,7 +167,40 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
 
             {mediaId && (
             <Card>
-                <CardContent className="p-0">
+                <CardContent className="space-y-4 p-4">
+                    <form className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <Input
+                                type="search"
+                                name="searchTerm"
+                                defaultValue={searchTerm ?? ""}
+                                placeholder="Search review content"
+                                className="sm:w-80"
+                            />
+                            <input type="hidden" name="mediaId" value={mediaId} />
+                            <select
+                                name="status"
+                                defaultValue={selectedStatus}
+                                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                            >
+                                <option value="PENDING">Pending</option>
+                                <option value="PUBLISHED">Published</option>
+                                <option value="UNPUBLISHED">Unpublished</option>
+                            </select>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button type="submit">Apply</Button>
+                            <Button type="button" variant="outline" asChild>
+                                <Link href={`/admin/dashboard/reviews-management?mediaId=${mediaId}&status=PENDING`}>
+                                    Reset
+                                </Link>
+                            </Button>
+                            <Button type="button" variant="ghost" asChild>
+                                <Link href="/admin/dashboard/reviews-management">Change Media</Link>
+                            </Button>
+                        </div>
+                    </form>
+
                     <Table>
                         <TableHeader>
                             <TableRow>

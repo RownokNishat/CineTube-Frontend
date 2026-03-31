@@ -1,25 +1,40 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAllUsers } from "@/services/user.services";
 import { formatDistanceToNow } from "date-fns";
 import { Users } from "lucide-react";
+import Link from "next/link";
 import DeleteUserButton from "./DeleteUserButton";
 
 export const dynamic = "force-dynamic";
 
 interface UsersManagementPageProps {
-    searchParams: Promise<{ page?: string; searchTerm?: string }>;
+    searchParams: Promise<{ page?: string; searchTerm?: string; role?: string; status?: string }>;
 }
 
 export default async function UsersManagementPage({ searchParams }: UsersManagementPageProps) {
     const params = await searchParams;
     const page = Number(params.page ?? 1);
+    const role = params.role === "USER" || params.role === "ADMIN" || params.role === "SUPER_ADMIN"
+        ? params.role
+        : undefined;
+    const status = params.status === "ACTIVE" || params.status === "BLOCKED" || params.status === "DELETED"
+        ? params.status
+        : undefined;
 
     let users: Awaited<ReturnType<typeof getAllUsers>>["data"] = [];
     let total = 0;
     try {
-        const res = await getAllUsers({ page, limit: 20, searchTerm: params.searchTerm });
+        const res = await getAllUsers({
+            page,
+            limit: 20,
+            searchTerm: params.searchTerm,
+            role,
+            status,
+        });
         users = res.data ?? [];
         total = res.meta?.total ?? 0;
     } catch { /* empty */ }
@@ -32,7 +47,45 @@ export default async function UsersManagementPage({ searchParams }: UsersManagem
             </div>
 
             <Card>
-                <CardContent className="p-0">
+                <CardContent className="space-y-4 p-4">
+                    <form className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <Input
+                                type="search"
+                                name="searchTerm"
+                                defaultValue={params.searchTerm ?? ""}
+                                placeholder="Search users by name or email"
+                                className="sm:w-80"
+                            />
+                            <select
+                                name="role"
+                                defaultValue={role ?? ""}
+                                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                            >
+                                <option value="">All roles</option>
+                                <option value="USER">User</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="SUPER_ADMIN">Super Admin</option>
+                            </select>
+                            <select
+                                name="status"
+                                defaultValue={status ?? ""}
+                                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                            >
+                                <option value="">All status</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="BLOCKED">Blocked</option>
+                                <option value="DELETED">Deleted</option>
+                            </select>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button type="submit">Apply</Button>
+                            <Button type="button" variant="outline" asChild>
+                                <Link href="/admin/dashboard/users-management">Reset</Link>
+                            </Button>
+                        </div>
+                    </form>
+
                     <Table>
                         <TableHeader>
                             <TableRow>
