@@ -24,10 +24,12 @@ const getActionErrorMessage = (error: unknown, fallback: string): string => {
 }
 
 export const createMediaCheckoutSessionAction = async (
-    mediaId: string
+    mediaId: string,
+    purchaseType: "PURCHASE" | "RENTAL" = "PURCHASE",
+    rentalDays?: number
 ): Promise<ApiResponse<{ checkoutUrl: string; sessionId: string }> | ApiErrorResponse> => {
     try {
-        return await createMediaCheckoutSession(mediaId)
+        return await createMediaCheckoutSession(mediaId, purchaseType, rentalDays)
     } catch (error: unknown) {
         const statusCode =
             error &&

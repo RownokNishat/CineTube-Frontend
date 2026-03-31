@@ -1,5 +1,6 @@
 "use client";
 
+import { createMediaCheckoutSessionAction } from "@/app/_actions/media.actions";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -9,21 +10,18 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { createMediaCheckoutSession } from "@/services/media.services";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Loader2, Clapperboard } from "lucide-react";
 
 interface RentButtonProps {
     mediaId: string;
     mediaTitle: string;
+    isLoggedIn: boolean;
 }
 
-export default function RentButton({ mediaId, mediaTitle }: RentButtonProps) {
-    const { data: session } = useSession();
+export default function RentButton({ mediaId, mediaTitle, isLoggedIn }: RentButtonProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [selectedDays, setSelectedDays] = useState("7");
@@ -35,23 +33,23 @@ export default function RentButton({ mediaId, mediaTitle }: RentButtonProps) {
     ];
 
     const handleRent = async () => {
-        if (!session) {
+        if (!isLoggedIn) {
             toast.error("Please sign in to rent movies");
-            router.push("/auth/login");
+            router.push("/login");
             return;
         }
 
         setLoading(true);
         try {
-            const result = await createMediaCheckoutSession(
+            const result = await createMediaCheckoutSessionAction(
                 mediaId,
                 "RENTAL",
                 parseInt(selectedDays)
             );
 
-            if (result.success && result.data?.checkoutUrl) {
+            if (result.success && "data" in result && result.data.checkoutUrl) {
                 setOpen(false);
-                router.push(result.data.checkoutUrl);
+                window.location.href = result.data.checkoutUrl;
             } else {
                 toast.error(result.message || "Failed to start rental checkout");
             }
@@ -62,12 +60,12 @@ export default function RentButton({ mediaId, mediaTitle }: RentButtonProps) {
         }
     };
 
-    if (!session) {
+    if (!isLoggedIn) {
         return (
             <Button
                 variant="outline"
                 className="w-full gap-2"
-                onClick={() => router.push("/auth/login")}
+                onClick={() => router.push("/login")}
             >
                 <Clapperboard className="size-4" />
                 Sign in to Rent
@@ -97,27 +95,27 @@ export default function RentButton({ mediaId, mediaTitle }: RentButtonProps) {
                         <label className="block text-sm font-medium mb-3">
                             Rental Duration
                         </label>
-                        <ToggleGroup
-                            type="single"
-                            value={selectedDays}
-                            onValueChange={setSelectedDays}
-                            className="justify-start"
-                        >
+                        <div className="grid grid-cols-2 gap-3">
                             {rentalOptions.map((option) => (
-                                <ToggleGroupItem
+                                <button
                                     key={option.days}
-                                    value={option.days.toString()}
-                                    className="data-[state=on]:bg-primary"
+                                    type="button"
+                                    onClick={() => setSelectedDays(option.days.toString())}
+                                    className={`rounded-lg border p-3 text-left transition-colors ${
+                                        selectedDays === option.days.toString()
+                                            ? "border-primary bg-primary/10"
+                                            : "border-border hover:border-primary/40"
+                                    }`}
                                 >
-                                    <div className="flex flex-col items-center">
+                                    <div className="flex flex-col items-center gap-1">
                                         <span>{option.days} Days</span>
                                         <span className="text-xs text-gray-500">
                                             ${option.price.toFixed(2)}
                                         </span>
                                     </div>
-                                </ToggleGroupItem>
+                                </button>
                             ))}
-                        </ToggleGroup>
+                        </div>
                     </div>
 
                     <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">

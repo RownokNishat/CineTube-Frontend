@@ -29,7 +29,11 @@ const AppointmentBarChart = ({data}: AppointmentBarChartProps) => {
 
 
     const formattedData = data.map((item) => ({
-        month : typeof item.month === "string" ? format(new Date(item.month), "MMM yyyy") : format(item.month, "MMM yyyy"),
+    month : item.month
+      ? typeof item.month === "string"
+        ? format(new Date(item.month), "MMM yyyy")
+        : format(item.month, "MMM yyyy")
+      : "Unknown",
 
         appointments : Number(item.count)
     }))

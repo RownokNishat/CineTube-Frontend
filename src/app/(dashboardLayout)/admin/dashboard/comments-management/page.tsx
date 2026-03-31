@@ -1,16 +1,17 @@
 import CommentsManagementContent from "./CommentsManagementContent";
 import { getReviews } from "@/services/review.services";
 import { deleteCommentAsAdmin } from "./_action";
+import { type Comment, type Review } from "@/types/review.types";
 
 export const dynamic = "force-dynamic";
 
 export default async function CommentsManagementPage() {
     // Fetch all reviews to get their comments
-    let allComments = [];
+    let allComments: Comment[] = [];
 
     try {
         const res = await getReviews({ limit: 100 });
-        const reviews = res.data ?? [];
+        const reviews = (res.data ?? []) as Array<Review & { comments?: Comment[] }>;
 
         // Flatten all comments from all reviews
         allComments = reviews

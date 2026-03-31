@@ -161,10 +161,10 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
                         {media.pricingType === "PREMIUM" && !hasMediaAccess && (
                             <div className="flex flex-col sm:flex-row gap-3 flex-1">
                                 <div className="flex-1">
-                                    <PurchaseButton mediaId={id} mediaTitle={media.title} isLoggedIn={!!user} price={media.price ?? 9.99} />
+                                    <PurchaseButton mediaId={id} mediaTitle={media.title} isLoggedIn={!!user} />
                                 </div>
                                 <div className="flex-1">
-                                    <RentButton mediaId={id} mediaTitle={media.title} />
+                                    <RentButton mediaId={id} mediaTitle={media.title} isLoggedIn={!!user} />
                                 </div>
                             </div>
                         )}
