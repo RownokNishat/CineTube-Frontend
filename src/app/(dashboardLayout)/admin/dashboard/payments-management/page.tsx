@@ -25,9 +25,6 @@ interface PaymentsManagementPageProps {
 
 const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPageProps) => {
   const params = await searchParams;
-  const searchTerm = params.searchTerm?.trim().toLowerCase() ?? "";
-  const typeFilter = params.type === "PURCHASE" || params.type === "SUBSCRIPTION" ? params.type : "";
-  const statusFilter = params.status?.trim().toUpperCase() ?? "";
 
   const [analyticsResponse, transactionsResponse] = await Promise.all([
     getPaymentDashboardData(30),
@@ -35,7 +32,7 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
       page: 1,
       limit: 100,
       searchTerm: params.searchTerm,
-      type: typeFilter || undefined,
+      type: (params.type as "PURCHASE" | "SUBSCRIPTION" | undefined) || undefined,
       status: params.status,
     }),
   ]);
@@ -91,7 +88,7 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
               />
               <select
                 name="type"
-                defaultValue={typeFilter}
+                defaultValue={params.type ?? ""}
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
               >
                 <option value="">All types</option>

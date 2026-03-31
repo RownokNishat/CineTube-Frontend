@@ -23,7 +23,7 @@ const DashboardMobileSidebar = ({dashboardHome, navItems, userInfo} : DashboardM
       {/* Logo / Brand */}
       <div className="flex h-16 items-center border-b px-6">
         <Link href={dashboardHome}>
-          <span className="text-xl font-bold text-primary">PH Healthcare</span>
+          <span className="text-xl font-bold text-primary">CineTube</span>
         </Link>
       </div>
 

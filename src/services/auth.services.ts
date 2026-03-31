@@ -183,6 +183,7 @@ export async function changeMyPassword(currentPassword: string, newPassword: str
         throw new Error(json.message || "Failed to change password");
     }
 
+    await storeTokensFromSetCookieHeaders(res.headers);
     return json;
 }
 

@@ -55,11 +55,21 @@ export interface Comment {
     userId: string;
     content: string;
     parentId: string | null;
+    status: "PENDING" | "PUBLISHED" | "UNPUBLISHED";
     createdAt: string;
+    updatedAt?: string;
     user: {
         id: string;
         name: string;
         image: string | null;
+    };
+    review?: {
+        id: string;
+        media?: {
+            id: string;
+            title: string;
+            posterUrl?: string | null;
+        };
     };
     _count: {
         likes: number;

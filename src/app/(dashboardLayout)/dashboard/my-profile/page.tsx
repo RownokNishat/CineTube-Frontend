@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Calendar, Shield } from "lucide-react";
+import { User, Calendar, Shield } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 

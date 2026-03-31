@@ -6,7 +6,8 @@
     "dev": "bun --bun next dev --webpack",
     "build": "bun --bun next build",
     "start": "bun --bun next start",
-    "lint": "eslint"
+    "lint": "npx eslint src/",
+    "type-check": "npx tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-devtools": "^0.9.6",

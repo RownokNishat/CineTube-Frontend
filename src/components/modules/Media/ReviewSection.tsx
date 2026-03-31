@@ -413,9 +413,6 @@ const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId, isAdmin }:
                             <div className="space-y-2">
                                 <Label>Rating: <strong>{rating}/10</strong></Label>
                                 <input type="range" min={1} max={10} step={1} value={rating} onChange={(e) => setRating(Number(e.target.value))} className="w-full accent-primary" />
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>1</span><span>10</span>
-                                </div>
                             </div>
                             <div className="space-y-1.5">
                                 <Label>Review</Label>
