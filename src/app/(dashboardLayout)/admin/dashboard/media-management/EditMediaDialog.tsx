@@ -208,7 +208,7 @@ const EditMediaDialog = ({ media }: EditMediaDialogProps) => {
                                                 className="mt-1"
                                             />
                                             <div>
-                                                <p className="text-sm font-medium">Editor's Pick</p>
+                                                <p className="text-sm font-medium">Editor&apos;s Pick</p>
                                                 <p className="text-xs text-muted-foreground">Include this title in the curated editor picks row.</p>
                                             </div>
                                         </label>

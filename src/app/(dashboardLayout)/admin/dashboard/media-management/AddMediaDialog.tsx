@@ -213,7 +213,7 @@ const AddMediaDialog = () => {
                                                 className="mt-1"
                                             />
                                             <div>
-                                                <p className="text-sm font-medium">Editor's Pick</p>
+                                                <p className="text-sm font-medium">Editor&apos;s Pick</p>
                                                 <p className="text-xs text-muted-foreground">Includes this title in the curated editor picks collection.</p>
                                             </div>
                                         </label>

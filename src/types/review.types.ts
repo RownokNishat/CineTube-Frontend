@@ -24,6 +24,11 @@ export interface Review {
     };
     likedByMe?: boolean;
     isLiked?: boolean;
+    permissions?: {
+        canEdit: boolean;
+        canDelete: boolean;
+        reason: string | null;
+    } | null;
 }
 
 export interface ReviewStats {

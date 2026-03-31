@@ -1,8 +1,8 @@
-import { getUserInfo, logoutUser } from "@/services/auth.services";
+import { getUserInfo } from "@/services/auth.services";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Film, LogOut, Settings, User, Bookmark } from "lucide-react";
+import { Film, Settings, User, Bookmark } from "lucide-react";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 
@@ -21,6 +21,9 @@ const Navbar = async () => {
                     <Link href="/media" className="text-muted-foreground hover:text-foreground transition-colors">Movies &amp; Series</Link>
                     <Link href="/media?mediaType=MOVIE" className="text-muted-foreground hover:text-foreground transition-colors">Movies</Link>
                     <Link href="/media?mediaType=SERIES" className="text-muted-foreground hover:text-foreground transition-colors">Series</Link>
+                    <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
+                    <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
+                    <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
                 </nav>
 
                 <div className="flex items-center gap-2 sm:gap-3\">

@@ -25,7 +25,7 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
     const attemptsRef = useRef(0)
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const verify = useCallback(async () => {
+    const verify = useCallback(async function verifyFn() {
         try {
             const result = await verifyMediaPurchaseAction(sessionId)
 
@@ -44,7 +44,9 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
                     return
                 }
 
-                timerRef.current = setTimeout(verify, POLL_INTERVAL_MS)
+                timerRef.current = setTimeout(() => {
+                    void verifyFn()
+                }, POLL_INTERVAL_MS)
                 return
             }
 
@@ -71,7 +73,9 @@ export default function MediaPurchaseSuccess({ sessionId }: MediaPurchaseSuccess
             return
         }
 
-        timerRef.current = setTimeout(verify, POLL_INTERVAL_MS)
+        timerRef.current = setTimeout(() => {
+            void verifyFn()
+        }, POLL_INTERVAL_MS)
     }, [sessionId])
 
     useEffect(() => {

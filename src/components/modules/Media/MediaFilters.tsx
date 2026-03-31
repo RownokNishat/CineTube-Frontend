@@ -17,6 +17,10 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
     const searchParams = useSearchParams();
 
     const [search, setSearch] = useState(searchParams.get("searchTerm") ?? "");
+    const [showAdvanced, setShowAdvanced] = useState(false);
+
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
 
     const updateParam = useCallback((key: string, value: string | null) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -42,134 +46,133 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
     const hasFilters = searchParams.toString().length > 0;
 
     return (
-        <div className="flex flex-wrap gap-3 items-center">
-            <form onSubmit={handleSearch} className="flex gap-2 flex-1 min-w-[200px]">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search title, director, cast..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-9"
-                    />
-                </div>
-                <Button type="submit" size="sm">Search</Button>
-            </form>
+        <div className="space-y-3">
+            <div className="flex flex-wrap gap-3 items-center">
+                <form onSubmit={handleSearch} className="flex gap-2 flex-1 min-w-[200px]">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search title, director, cast..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-9"
+                        />
+                    </div>
+                    <Button type="submit" size="sm">Search</Button>
+                </form>
 
-            <Select value={searchParams.get("mediaType") ?? "all"} onValueChange={(v) => updateParam("mediaType", v)}>
-                <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="MOVIE">Movies</SelectItem>
-                    <SelectItem value="SERIES">Series</SelectItem>
-                </SelectContent>
-            </Select>
+                <Select value={searchParams.get("mediaType") ?? "all"} onValueChange={(v) => updateParam("mediaType", v)}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="MOVIE">Movies</SelectItem>
+                        <SelectItem value="SERIES">Series</SelectItem>
+                    </SelectContent>
+                </Select>
 
-            <Select value={searchParams.get("pricingType") ?? "all"} onValueChange={(v) => updateParam("pricingType", v)}>
-                <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Pricing" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="FREE">Free</SelectItem>
-                    <SelectItem value="PREMIUM">Premium</SelectItem>
-                </SelectContent>
-            </Select>
+                <Select value={searchParams.get("pricingType") ?? "all"} onValueChange={(v) => updateParam("pricingType", v)}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Pricing" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="FREE">Free</SelectItem>
+                        <SelectItem value="PREMIUM">Premium</SelectItem>
+                    </SelectContent>
+                </Select>
 
-            <Select value={searchParams.get("genre") ?? "all"} onValueChange={(v) => updateParam("genre", v)}>
-                <SelectTrigger className="w-36">
-                    <SelectValue placeholder="Genre" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Genres</SelectItem>
-                    {genres.map((g) => (
-                        <SelectItem key={g.id} value={g.name}>{g.name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+                <Select value={searchParams.get("genre") ?? "all"} onValueChange={(v) => updateParam("genre", v)}>
+                    <SelectTrigger className="w-36">
+                        <SelectValue placeholder="Genre" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Genres</SelectItem>
+                        {genres.map((g) => (
+                            <SelectItem key={g.id} value={g.name}>{g.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-            <Select value={searchParams.get("sortBy") ?? "createdAt"} onValueChange={(v) => updateParam("sortBy", v)}>
-                <SelectTrigger className="w-36">
-                    <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="createdAt">Latest</SelectItem>
-                    <SelectItem value="averageRating">Top Rated</SelectItem>
-                    <SelectItem value="mostLiked">Most Liked</SelectItem>
-                    <SelectItem value="reviewCount">Most Reviewed</SelectItem>
-                    <SelectItem value="popularity">Most Popular</SelectItem>
-                    <SelectItem value="releaseYear">Release Year</SelectItem>
-                    <SelectItem value="title">Title A-Z</SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Input
-                type="number"
-                min={1900}
-                max={2100}
-                placeholder="Year"
-                defaultValue={searchParams.get("releaseYear") ?? ""}
-                className="w-28"
-                onBlur={(e) => updateParam("releaseYear", e.target.value || null)}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        const target = e.currentTarget as HTMLInputElement;
-                        updateParam("releaseYear", target.value || null);
-                    }
-                }}
-            />
-
-            <Input
-                type="number"
-                min={0}
-                max={10}
-                step={0.1}
-                placeholder="Min rating"
-                defaultValue={searchParams.get("minRating") ?? ""}
-                className="w-32"
-                onBlur={(e) => updateParam("minRating", e.target.value || null)}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        const target = e.currentTarget as HTMLInputElement;
-                        updateParam("minRating", target.value || null);
-                    }
-                }}
-            />
-
-            <Input
-                placeholder="Platform"
-                defaultValue={searchParams.get("streamingPlatform") ?? ""}
-                className="w-36"
-                onBlur={(e) => updateParam("streamingPlatform", e.target.value || null)}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        const target = e.currentTarget as HTMLInputElement;
-                        updateParam("streamingPlatform", target.value || null);
-                    }
-                }}
-            />
-
-            <Select value={searchParams.get("popularity") ?? "all"} onValueChange={(v) => updateParam("popularity", v)}>
-                <SelectTrigger className="w-36">
-                    <SelectValue placeholder="Popularity" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Popularity</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                </SelectContent>
-            </Select>
-
-            {hasFilters && (
-                <Button variant="ghost" size="sm" onClick={clearAll} className="text-muted-foreground">
-                    <X className="size-4 mr-1" /> Clear
+                <Button
+                    variant={showAdvanced ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                >
+                    More Filters
                 </Button>
+
+                {hasFilters && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearAll}
+                        className="text-destructive hover:text-destructive"
+                    >
+                        <X className="size-4 mr-1" /> Clear
+                    </Button>
+                )}
+            </div>
+
+            {/* Advanced Filters */}
+            {showAdvanced && (
+                <div className="flex flex-wrap gap-3 p-4 border rounded-lg bg-muted/30">
+                    <Select value={searchParams.get("streamingPlatform") ?? "all"} onValueChange={(v) => updateParam("streamingPlatform", v)}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Streaming Platform" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Platforms</SelectItem>
+                            <SelectItem value="YouTube">YouTube</SelectItem>
+                            <SelectItem value="Netflix">Netflix</SelectItem>
+                            <SelectItem value="Disney+">Disney+</SelectItem>
+                            <SelectItem value="Amazon Prime">Amazon Prime</SelectItem>
+                            <SelectItem value="HBO Max">HBO Max</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={searchParams.get("releaseYear") ?? "all"} onValueChange={(v) => updateParam("releaseYear", v)}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Release Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Years</SelectItem>
+                            {years.map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                    {year}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={searchParams.get("minRating") ?? "all"} onValueChange={(v) => updateParam("minRating", v)}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Minimum Rating" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Ratings</SelectItem>
+                            <SelectItem value="7">7.0+ stars</SelectItem>
+                            <SelectItem value="7.5">7.5+ stars</SelectItem>
+                            <SelectItem value="8">8.0+ stars</SelectItem>
+                            <SelectItem value="8.5">8.5+ stars</SelectItem>
+                            <SelectItem value="9">9.0+ stars</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={searchParams.get("sortBy") ?? "createdAt"} onValueChange={(v) => updateParam("sortBy", v)}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Sort by" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="createdAt">Latest</SelectItem>
+                            <SelectItem value="averageRating">Top Rated</SelectItem>
+                            <SelectItem value="mostLiked">Most Liked</SelectItem>
+                            <SelectItem value="reviewCount">Most Reviewed</SelectItem>
+                            <SelectItem value="popularity">Popularity</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             )}
         </div>
     );

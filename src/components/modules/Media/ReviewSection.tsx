@@ -53,7 +53,9 @@ const ReviewCard = ({
     const [deletingReview, setDeletingReview] = useState(false);
     const [moderating, setModerating] = useState(false);
 
-    const isOwnUnpublished = !!userId && review.userId === userId && review.status !== "PUBLISHED";
+    const isOwner = !!userId && review.userId === userId;
+    const canEdit = review.permissions ? review.permissions.canEdit : (isOwner && review.status !== "PUBLISHED");
+    const canDelete = review.permissions ? review.permissions.canDelete : (isOwner && review.status !== "PUBLISHED");
 
     const handleLike = async () => {
         if (!userId) { toast.error("Please login to like reviews"); return; }
@@ -287,10 +289,22 @@ const ReviewCard = ({
                         <MessageCircle className="size-4" />
                         <span>{review._count?.comments ?? 0} Comments</span>
                     </button>
-                    {isOwnUnpublished && !isEditing && (
+                    {isOwner && !isEditing && (
                         <>
-                            <button onClick={() => setIsEditing(true)} className="text-xs text-primary hover:underline">Edit</button>
-                            <button onClick={handleDeleteReview} className="text-xs text-destructive hover:underline" disabled={deletingReview}>
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="text-xs text-primary hover:underline disabled:text-muted-foreground disabled:no-underline"
+                                disabled={!canEdit}
+                                title={!canEdit ? (review.permissions?.reason ?? "You cannot edit this review") : undefined}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={handleDeleteReview}
+                                className="text-xs text-destructive hover:underline disabled:text-muted-foreground disabled:no-underline"
+                                disabled={deletingReview || !canDelete}
+                                title={!canDelete ? (review.permissions?.reason ?? "You cannot delete this review") : undefined}
+                            >
                                 {deletingReview ? "Deleting..." : "Delete"}
                             </button>
                         </>

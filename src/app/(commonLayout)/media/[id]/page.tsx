@@ -1,6 +1,7 @@
 import ReviewSection from "@/components/modules/Media/ReviewSection";
 import WatchlistButton from "@/components/modules/Media/WatchlistButton";
 import PurchaseButton from "@/components/modules/Media/PurchaseButton";
+import RentButton from "@/components/modules/Media/RentButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getMediaById, getUserMediaAccess, verifyMediaPurchase } from "@/services/media.services";
@@ -153,19 +154,36 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
                         </div>
                     )}
 
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                         <WatchlistButton mediaId={id} isInWatchlist={isInWatchlist} isLoggedIn={!!user} />
                         
-                        {/* Premium Media Purchase or Watch Button */}
-                        {media.pricingType === "PREMIUM" && !hasMediaAccess ? (
-                            <PurchaseButton mediaId={id} mediaTitle={media.title} isLoggedIn={!!user} price={9.99} />
-                        ) : media.streamingLink ? (
-                            <Button variant="outline" asChild className="gap-2">
+                        {/* Premium Media Purchase/Rent Options */}
+                        {media.pricingType === "PREMIUM" && !hasMediaAccess && (
+                            <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                                <div className="flex-1">
+                                    <PurchaseButton mediaId={id} mediaTitle={media.title} isLoggedIn={!!user} price={media.price ?? 9.99} />
+                                </div>
+                                <div className="flex-1">
+                                    <RentButton mediaId={id} mediaTitle={media.title} />
+                                </div>
+                            </div>
+                        )}
+                        
+                        {media.pricingType === "PREMIUM" && hasMediaAccess && media.streamingLink && (
+                            <Button variant="default" asChild className="gap-2">
                                 <a href={media.streamingLink} target="_blank" rel="noopener noreferrer">
                                     <ExternalLink className="size-4" /> Watch Now
                                 </a>
                             </Button>
-                        ) : null}
+                        )}
+                        
+                        {media.pricingType === "FREE" && media.streamingLink && (
+                            <Button variant="outline" asChild className="gap-2">
+                                <a href={media.streamingLink} target="_blank" rel="noopener noreferrer">
+                                    <ExternalLink className="size-4" /> Watch Free
+                                </a>
+                            </Button>
+                        )}
 
                         {media.trailerUrl && (
                             <Button variant="ghost" asChild className="gap-2">

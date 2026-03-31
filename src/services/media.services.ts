@@ -26,10 +26,16 @@ export async function deleteMedia(id: string): Promise<ApiResponse<null>> {
     return httpClient.delete<null>(`/media/${id}`);
 }
 
-// Premium Media Purchase Endpoints
-export async function createMediaCheckoutSession(mediaId: string): Promise<ApiResponse<{ checkoutUrl: string; sessionId: string }>> {
+// Premium Media Purchase/Rental Endpoints
+export async function createMediaCheckoutSession(
+    mediaId: string,
+    purchaseType: "PURCHASE" | "RENTAL" = "PURCHASE",
+    rentalDays?: number
+): Promise<ApiResponse<{ checkoutUrl: string; sessionId: string }>> {
     return httpClient.post<{ checkoutUrl: string; sessionId: string }>("/media/purchase/checkout", {
         mediaId,
+        purchaseType,
+        rentalDays,
     });
 }
 
