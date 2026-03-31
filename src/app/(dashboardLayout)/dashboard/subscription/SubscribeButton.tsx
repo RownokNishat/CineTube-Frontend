@@ -7,9 +7,10 @@ import { createCheckoutSessionAction } from "./_action";
 interface SubscribeButtonProps {
     plan: "MONTHLY" | "YEARLY";
     label: string;
+    disabled?: boolean;
 }
 
-const SubscribeButton = ({ plan, label }: SubscribeButtonProps) => {
+const SubscribeButton = ({ plan, label, disabled = false }: SubscribeButtonProps) => {
     const [loading, setLoading] = useState(false);
 
     const handleSubscribe = async () => {
@@ -31,7 +32,7 @@ const SubscribeButton = ({ plan, label }: SubscribeButtonProps) => {
     };
 
     return (
-        <Button className="w-full" onClick={handleSubscribe} disabled={loading}>
+        <Button className="w-full" onClick={handleSubscribe} disabled={loading || disabled}>
             {loading ? "Redirecting..." : label}
         </Button>
     );

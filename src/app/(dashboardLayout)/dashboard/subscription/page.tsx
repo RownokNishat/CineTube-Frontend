@@ -35,6 +35,10 @@ export default async function SubscriptionPage({ searchParams }: SubscriptionPag
         );
     } catch { /* fallback empty */ }
 
+    const hasActivePaidSubscription = Boolean(
+        subscription && subscription.status === "ACTIVE" && subscription.plan !== "FREE",
+    );
+
     return (
         <div className="space-y-6 max-w-3xl">
             <div>
@@ -50,7 +54,7 @@ export default async function SubscriptionPage({ searchParams }: SubscriptionPag
                 )}
             </div>
 
-            {subscription && subscription.status === "ACTIVE" && (
+            {subscription && (
                 <Card className="border-primary">
                     <CardHeader>
                         <CardTitle className="flex items-center justify-between">
@@ -59,25 +63,42 @@ export default async function SubscriptionPage({ searchParams }: SubscriptionPag
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
-                        <p>Started: {new Date(subscription.startDate).toLocaleDateString()}</p>
+                        {subscription.startDate && <p>Started: {new Date(subscription.startDate).toLocaleDateString()}</p>}
                         <p>Renews: {subscription.endDate ? new Date(subscription.endDate).toLocaleDateString() : "N/A"}</p>
                         {subscription.amount > 0 && <p>Amount: ${subscription.amount}</p>}
+                        {subscription.plan === "FREE" && (
+                            <p className="text-muted-foreground">You are currently on the free plan. Upgrade below to unlock premium content.</p>
+                        )}
                     </CardContent>
-                    <CardFooter>
-                        <CancelSubscriptionButton />
-                    </CardFooter>
+                    {hasActivePaidSubscription && (
+                        <CardFooter>
+                            <CancelSubscriptionButton />
+                        </CardFooter>
+                    )}
                 </Card>
             )}
 
-            {(!subscription || subscription.status !== "ACTIVE") && (
+            <div className="space-y-3">
+                <div>
+                    <h2 className="text-lg font-semibold">Available Plans</h2>
+                    <p className="text-sm text-muted-foreground">
+                        {hasActivePaidSubscription
+                            ? "Choose another plan to switch your subscription."
+                            : "Choose a plan to unlock premium content."}
+                    </p>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {plans.map((plan) => {
                         const paidPlan: "MONTHLY" | "YEARLY" = plan.plan === "YEARLY" ? "YEARLY" : "MONTHLY";
+                        const isCurrentPlan = subscription?.status === "ACTIVE" && subscription.plan === plan.plan;
 
                         return (
-                            <Card key={plan.plan}>
+                            <Card key={plan.plan} className={isCurrentPlan ? "border-primary" : undefined}>
                                 <CardHeader className="text-center">
-                                    <CardTitle>{plan.label ?? plan.plan}</CardTitle>
+                                    <CardTitle className="flex items-center justify-center gap-2">
+                                        <span>{plan.label ?? plan.plan}</span>
+                                        {isCurrentPlan && <Badge>Current</Badge>}
+                                    </CardTitle>
                                     <div>
                                         <span className="text-3xl font-bold">${plan.price.toFixed(2)}</span>
                                         <span className="text-muted-foreground text-sm ml-1">/ {plan.duration}</span>
@@ -92,7 +113,11 @@ export default async function SubscriptionPage({ searchParams }: SubscriptionPag
                                     ))}
                                 </CardContent>
                                 <CardFooter>
-                                    <SubscribeButton plan={paidPlan} label={`Subscribe ${plan.label ?? plan.plan}`} />
+                                    <SubscribeButton
+                                        plan={paidPlan}
+                                        label={isCurrentPlan ? "Current Plan" : `Subscribe ${plan.label ?? plan.plan}`}
+                                        disabled={isCurrentPlan}
+                                    />
                                 </CardFooter>
                             </Card>
                         );
@@ -105,7 +130,7 @@ export default async function SubscriptionPage({ searchParams }: SubscriptionPag
                         </Card>
                     )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
