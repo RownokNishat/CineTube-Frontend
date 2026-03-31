@@ -29,6 +29,18 @@ export async function createCheckoutSession(plan: "MONTHLY" | "YEARLY"): Promise
     return httpClient.post<{ checkoutUrl: string }>("/subscriptions/checkout", { plan });
 }
 
+export async function verifySubscriptionCheckout(sessionId: string): Promise<ApiResponse<{
+    verified: boolean;
+    paymentStatus: string;
+}>> {
+    return httpClient.get<{
+        verified: boolean;
+        paymentStatus: string;
+    }>("/subscriptions/verify", {
+        params: { sessionId },
+    });
+}
+
 export async function cancelSubscription(): Promise<ApiResponse<null>> {
     return httpClient.post<null>("/subscriptions/cancel", {});
 }
