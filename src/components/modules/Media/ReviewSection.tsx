@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Comment, Review } from "@/types/review.types";
+import { reviewZodSchema } from "@/zod/auth.validation";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageCircle, Star } from "lucide-react";
 import { useState } from "react";
@@ -361,12 +362,31 @@ const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId, isAdmin }:
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!content.trim()) { setError("Review content is required"); return; }
+        const sanitizedContent = content.trim();
+        const tagList = tags.split(",").map((t) => t.trim()).filter(Boolean);
+
+        const parsedPayload = reviewZodSchema.safeParse({
+            rating,
+            content: sanitizedContent,
+            isSpoiler,
+            tags: tagList,
+        });
+
+        if (!parsedPayload.success) {
+            setError(parsedPayload.error.issues[0]?.message ?? "Invalid review input");
+            return;
+        }
+
         setSubmitting(true);
         setError(null);
         try {
-            const tagList = tags.split(",").map((t) => t.trim()).filter(Boolean);
-            const result = await createReviewAction({ mediaId, rating, content, isSpoiler, tags: tagList });
+            const result = await createReviewAction({
+                mediaId,
+                rating: parsedPayload.data.rating,
+                content: parsedPayload.data.content,
+                isSpoiler: parsedPayload.data.isSpoiler,
+                tags: parsedPayload.data.tags,
+            });
             if (!result.success) { setError(result.message || "Failed to submit review"); return; }
             setReviews((prev) => [result.data, ...prev]);
             setContent("");

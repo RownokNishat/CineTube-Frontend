@@ -15,6 +15,31 @@ const getActionErrorMessage = (error: unknown, fallback: string): string => {
         "data" in error.response &&
         error.response.data &&
         typeof error.response.data === "object" &&
+        "errorDetails" in error.response.data
+    ) {
+        const errorDetails = error.response.data.errorDetails
+        if (Array.isArray(errorDetails) && errorDetails.length > 0) {
+            const firstError = errorDetails[0]
+            if (
+                firstError &&
+                typeof firstError === "object" &&
+                "message" in firstError &&
+                typeof firstError.message === "string"
+            ) {
+                return firstError.message
+            }
+        }
+    }
+
+    if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
         "message" in error.response.data &&
         typeof error.response.data.message === "string"
     ) {
