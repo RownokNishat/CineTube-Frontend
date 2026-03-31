@@ -42,6 +42,22 @@ export async function getAdminMediaReviews(mediaId: string, params?: Omit<Review
     return httpClient.get<Review[]>(`/reviews/admin/media/${mediaId}`, { params: queryParams });
 }
 
+export async function getMyReviews(params?: Omit<ReviewQueryParams, "mediaId">): Promise<ApiResponse<Review[]>> {
+    return httpClient.get<Review[]>("/reviews/me", { params: params as Record<string, unknown> });
+}
+
+export async function getAdminReviewStats(): Promise<ApiResponse<{
+    totalReviews: number;
+    pendingReviewsCount: number;
+    recentReviews: Review[];
+}>> {
+    return httpClient.get<{
+        totalReviews: number;
+        pendingReviewsCount: number;
+        recentReviews: Review[];
+    }>("/reviews/admin/stats");
+}
+
 export async function createReview(payload: CreateReviewPayload): Promise<ApiResponse<Review>> {
     const { mediaId, ...data } = payload;
     return httpClient.post<Review>(`/reviews/media/${mediaId}`, data);

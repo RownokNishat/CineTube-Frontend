@@ -8,6 +8,7 @@ export interface Media {
     title: string;
     synopsis: string;
     releaseYear: number;
+    price?: number | null;
     director: string;
     cast: string[];
     streamingPlatform: string;

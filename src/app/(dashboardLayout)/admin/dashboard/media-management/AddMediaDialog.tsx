@@ -22,6 +22,7 @@ const AddMediaDialog = () => {
     const [loading, setLoading] = useState(false);
     const [mediaType, setMediaType] = useState("MOVIE");
     const [pricingType, setPricingType] = useState("FREE");
+    const [price, setPrice] = useState("9.99");
     const [status, setStatus] = useState("DRAFT");
     const [isFeatured, setIsFeatured] = useState(false);
     const [isEditorPick, setIsEditorPick] = useState(false);
@@ -40,6 +41,7 @@ const AddMediaDialog = () => {
         setOpen(false);
         setMediaType("MOVIE");
         setPricingType("FREE");
+        setPrice("9.99");
         setStatus("DRAFT");
         setIsFeatured(false);
         setIsEditorPick(false);
@@ -69,6 +71,17 @@ const AddMediaDialog = () => {
         formData.set("status", status);
         formData.set("isFeatured", String(isFeatured));
         formData.set("isEditorPick", String(isEditorPick));
+
+        if (pricingType === "PREMIUM") {
+            const parsedPrice = Number(price);
+            if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+                toast.error("Premium media price must be greater than 0");
+                return;
+            }
+            formData.set("price", String(parsedPrice));
+        } else {
+            formData.set("price", "0");
+        }
 
         // Backend expects cast as an array; split comma-separated string
         const castRaw = (formData.get("cast") as string) ?? "";
@@ -165,6 +178,19 @@ const AddMediaDialog = () => {
                                                 <SelectItem value="PREMIUM">Premium</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="add-price">Price (USD)</Label>
+                                        <Input
+                                            id="add-price"
+                                            name="price"
+                                            type="number"
+                                            value={pricingType === "FREE" ? "0" : price}
+                                            onChange={(e) => setPrice(e.target.value)}
+                                            min={0}
+                                            step="0.01"
+                                            disabled={pricingType === "FREE"}
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label htmlFor="add-year">Release Year <span className="text-destructive">*</span></Label>

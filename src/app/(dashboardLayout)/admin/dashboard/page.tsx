@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAllUsers } from "@/services/user.services";
 import { getMediaList } from "@/services/media.services";
-import { getReviews } from "@/services/review.services";
+import { getAdminReviewStats } from "@/services/review.services";
 import { Film, Star, Users, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,21 +10,32 @@ import { Badge } from "@/components/ui/badge";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-    const [usersRes, mediaRes, pendingReviewsRes, allReviewsRes] = await Promise.all([
+    const [usersRes, mediaRes, reviewStatsRes] = await Promise.all([
         getAllUsers({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
         getMediaList({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
-        getReviews({ limit: 5 }).catch(() => ({ data: [] })),
-        getReviews({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
+        getAdminReviewStats().catch(() => ({
+            data: {
+                totalReviews: 0,
+                pendingReviewsCount: 0,
+                recentReviews: [],
+            },
+        })),
     ]);
+
+    const reviewStats = reviewStatsRes.data ?? {
+        totalReviews: 0,
+        pendingReviewsCount: 0,
+        recentReviews: [],
+    };
 
     const stats = [
         { title: "Total Users", value: (usersRes as { meta?: { total?: number } }).meta?.total ?? 0, icon: Users, href: "/admin/dashboard/users-management", color: "text-blue-500" },
         { title: "Total Media", value: (mediaRes as { meta?: { total?: number } }).meta?.total ?? 0, icon: Film, href: "/admin/dashboard/media-management", color: "text-purple-500" },
-        { title: "Total Reviews", value: (allReviewsRes as { meta?: { total?: number } }).meta?.total ?? 0, icon: Star, href: "/admin/dashboard/reviews-management", color: "text-yellow-500" },
-        { title: "Pending Reviews", value: (pendingReviewsRes.data ?? []).length, icon: Clock, href: "/admin/dashboard/reviews-management", color: "text-orange-500" },
+        { title: "Total Reviews", value: reviewStats.totalReviews, icon: Star, href: "/admin/dashboard/reviews-management", color: "text-yellow-500" },
+        { title: "Pending Reviews", value: reviewStats.pendingReviewsCount, icon: Clock, href: "/admin/dashboard/reviews-management", color: "text-orange-500" },
     ];
 
-    const recentReviews = pendingReviewsRes.data ?? [];
+    const recentReviews = reviewStats.recentReviews ?? [];
 
     return (
         <div className="space-y-6">
