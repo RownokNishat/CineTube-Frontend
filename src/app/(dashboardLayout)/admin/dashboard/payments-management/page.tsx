@@ -145,11 +145,11 @@ const PaymentsManagementPage = async () => {
                       <CreditCard className="size-4 text-muted-foreground" />
                       <span>{plan.plan}</span>
                     </div>
-                    <Badge variant="secondary">{plan.duration}</Badge>
+                    <Badge variant="secondary">{plan.duration ?? "Custom"}</Badge>
                   </div>
                   <p className="mb-3 text-2xl font-semibold">{formatCurrency(Number(plan.price || 0))}</p>
                   <div className="space-y-2 text-sm text-muted-foreground">
-                    {plan.features.map((feature) => (
+                    {(plan.features ?? []).map((feature) => (
                       <p key={feature}>{feature}</p>
                     ))}
                   </div>
