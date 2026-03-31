@@ -26,6 +26,7 @@ export const userNavItems: NavSection[] = [
         title: "My Content",
         items: [
             { title: "My Watchlist", href: "/dashboard/watchlist", icon: "Bookmark" },
+            { title: "Purchase History", href: "/dashboard/purchase-history", icon: "Receipt" },
             { title: "Subscription", href: "/dashboard/subscription", icon: "CreditCard" },
         ],
     },
@@ -44,6 +45,12 @@ export const adminNavItems: NavSection[] = [
         title: "User Management",
         items: [
             { title: "Users", href: "/admin/dashboard/users-management", icon: "Users" },
+        ],
+    },
+    {
+        title: "Business",
+        items: [
+            { title: "Payments", href: "/admin/dashboard/payments-management", icon: "Wallet" },
         ],
     },
 ];

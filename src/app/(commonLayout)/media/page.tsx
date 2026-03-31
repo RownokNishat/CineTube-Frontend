@@ -14,6 +14,10 @@ interface MediaPageProps {
         mediaType?: string;
         pricingType?: string;
         genre?: string;
+        streamingPlatform?: string;
+        releaseYear?: string;
+        minRating?: string;
+        popularity?: string;
         sortBy?: string;
         sortOrder?: string;
     }>;
@@ -23,6 +27,8 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
     const params = await searchParams;
     const page = Number(params.page ?? 1);
     const limit = 20;
+    const parsedReleaseYear = params.releaseYear ? Number(params.releaseYear) : undefined;
+    const parsedMinRating = params.minRating ? Number(params.minRating) : undefined;
 
     const [mediaRes, genreRes] = await Promise.all([
         getMediaList({
@@ -32,6 +38,10 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
             mediaType: params.mediaType as "MOVIE" | "SERIES" | undefined,
             pricingType: params.pricingType as "FREE" | "PREMIUM" | undefined,
             genre: params.genre,
+            streamingPlatform: params.streamingPlatform,
+            releaseYear: Number.isFinite(parsedReleaseYear) ? parsedReleaseYear : undefined,
+            minRating: Number.isFinite(parsedMinRating) ? parsedMinRating : undefined,
+            popularity: params.popularity,
             sortBy: params.sortBy,
             sortOrder: (params.sortOrder ?? "desc") as "asc" | "desc",
         }).catch(() => ({ data: [], meta: undefined, success: true, message: "" })),
@@ -49,6 +59,10 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
         if (params.mediaType) sp.set("mediaType", params.mediaType);
         if (params.pricingType) sp.set("pricingType", params.pricingType);
         if (params.genre) sp.set("genre", params.genre);
+        if (params.streamingPlatform) sp.set("streamingPlatform", params.streamingPlatform);
+        if (params.releaseYear) sp.set("releaseYear", params.releaseYear);
+        if (params.minRating) sp.set("minRating", params.minRating);
+        if (params.popularity) sp.set("popularity", params.popularity);
         if (params.sortBy) sp.set("sortBy", params.sortBy);
         if (params.sortOrder) sp.set("sortOrder", params.sortOrder);
         sp.set("page", String(p));

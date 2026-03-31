@@ -1,7 +1,7 @@
 "use server"
 
 import { getComments, createComment } from "@/services/comment.services"
-import { createReview, likeReview, unlikeReview } from "@/services/review.services"
+import { createReview, deleteReview, likeReview, unlikeReview, updateReview } from "@/services/review.services"
 import { type ApiErrorResponse, type ApiResponse } from "@/types/api.types"
 import { type Comment, type Review } from "@/types/review.types"
 
@@ -77,5 +77,26 @@ export const createCommentAction = async (payload: {
         return await createComment(payload)
     } catch (error: unknown) {
         return { success: false, message: getActionErrorMessage(error, "Failed to add comment") }
+    }
+}
+
+export const updateReviewAction = async (
+    reviewId: string,
+    payload: { rating?: number; content?: string; isSpoiler?: boolean; tags?: string[] }
+): Promise<ApiResponse<Review> | ApiErrorResponse> => {
+    try {
+        return await updateReview(reviewId, payload)
+    } catch (error: unknown) {
+        return { success: false, message: getActionErrorMessage(error, "Failed to update review") }
+    }
+}
+
+export const deleteReviewAction = async (
+    reviewId: string
+): Promise<ApiResponse<null> | ApiErrorResponse> => {
+    try {
+        return await deleteReview(reviewId)
+    } catch (error: unknown) {
+        return { success: false, message: getActionErrorMessage(error, "Failed to delete review") }
     }
 }

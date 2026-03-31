@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createCommentAction, createReviewAction, getCommentsAction, likeReviewAction, unlikeReviewAction } from "@/app/_actions/review.actions";
+import { createCommentAction, createReviewAction, deleteReviewAction, getCommentsAction, likeReviewAction, unlikeReviewAction, updateReviewAction } from "@/app/_actions/review.actions";
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,7 +22,17 @@ interface ReviewSectionProps {
     userId?: string;
 }
 
-const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => {
+const ReviewCard = ({
+    review,
+    userId,
+    onReviewUpdated,
+    onReviewDeleted,
+}: {
+    review: Review;
+    userId?: string;
+    onReviewUpdated: (updatedReview: Review) => void;
+    onReviewDeleted: (reviewId: string) => void;
+}) => {
     const [likes, setLikes] = useState(review._count?.likes ?? 0);
     const [liked, setLiked] = useState(review.likedByMe ?? review.isLiked ?? false);
     const [showComments, setShowComments] = useState(false);
@@ -30,6 +40,15 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
     const [commentText, setCommentText] = useState("");
     const [loadingComments, setLoadingComments] = useState(false);
     const [submittingComment, setSubmittingComment] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(review.content);
+    const [editRating, setEditRating] = useState(review.rating);
+    const [editTags, setEditTags] = useState((review.tags ?? []).join(", "));
+    const [editSpoiler, setEditSpoiler] = useState(review.isSpoiler);
+    const [savingEdit, setSavingEdit] = useState(false);
+    const [deletingReview, setDeletingReview] = useState(false);
+
+    const isOwnUnpublished = !!userId && review.userId === userId && review.status !== "PUBLISHED";
 
     const handleLike = async () => {
         if (!userId) { toast.error("Please login to like reviews"); return; }
@@ -83,6 +102,58 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
         }
     };
 
+    const handleUpdateReview = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editContent.trim()) {
+            toast.error("Review content is required");
+            return;
+        }
+
+        setSavingEdit(true);
+        try {
+            const tags = editTags.split(",").map((t) => t.trim()).filter(Boolean);
+            const result = await updateReviewAction(review.id, {
+                content: editContent,
+                rating: editRating,
+                isSpoiler: editSpoiler,
+                tags,
+            });
+
+            if (!result.success) {
+                toast.error(result.message || "Failed to update review");
+                return;
+            }
+
+            onReviewUpdated(result.data);
+            setIsEditing(false);
+            toast.success("Review updated");
+        } catch {
+            toast.error("Failed to update review");
+        } finally {
+            setSavingEdit(false);
+        }
+    };
+
+    const handleDeleteReview = async () => {
+        if (!confirm("Delete this review?")) return;
+
+        setDeletingReview(true);
+        try {
+            const result = await deleteReviewAction(review.id);
+            if (!result.success) {
+                toast.error(result.message || "Failed to delete review");
+                return;
+            }
+
+            onReviewDeleted(review.id);
+            toast.success("Review deleted");
+        } catch {
+            toast.error("Failed to delete review");
+        } finally {
+            setDeletingReview(false);
+        }
+    };
+
     return (
         <Card>
             <CardContent className="pt-4 space-y-3">
@@ -109,7 +180,26 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
                     <Badge variant="destructive" className="text-xs">Contains Spoilers</Badge>
                 )}
 
-                <p className="text-sm leading-relaxed">{review.content}</p>
+                {isEditing ? (
+                    <form onSubmit={handleUpdateReview} className="space-y-3">
+                        <div className="space-y-1">
+                            <Label className="text-xs">Rating: {editRating}/10</Label>
+                            <input type="range" min={1} max={10} step={1} value={editRating} onChange={(e) => setEditRating(Number(e.target.value))} className="w-full accent-primary" />
+                        </div>
+                        <Textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={3} />
+                        <input value={editTags} onChange={(e) => setEditTags(e.target.value)} placeholder="tag1, tag2" className="w-full border rounded px-3 py-2 text-sm bg-background" />
+                        <div className="flex items-center gap-2">
+                            <input id={`edit-spoiler-${review.id}`} type="checkbox" checked={editSpoiler} onChange={(e) => setEditSpoiler(e.target.checked)} className="size-4" />
+                            <Label htmlFor={`edit-spoiler-${review.id}`} className="text-xs">Contains spoilers</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button type="submit" size="sm" disabled={savingEdit}>{savingEdit ? "Saving..." : "Save"}</Button>
+                            <Button type="button" size="sm" variant="outline" onClick={() => setIsEditing(false)} disabled={savingEdit}>Cancel</Button>
+                        </div>
+                    </form>
+                ) : (
+                    <p className="text-sm leading-relaxed">{review.content}</p>
+                )}
 
                 {review.tags?.length > 0 && (
                     <div className="flex flex-wrap gap-1">
@@ -128,6 +218,14 @@ const ReviewCard = ({ review, userId }: { review: Review; userId?: string }) => 
                         <MessageCircle className="size-4" />
                         <span>{review._count?.comments ?? 0} Comments</span>
                     </button>
+                    {isOwnUnpublished && !isEditing && (
+                        <>
+                            <button onClick={() => setIsEditing(true)} className="text-xs text-primary hover:underline">Edit</button>
+                            <button onClick={handleDeleteReview} className="text-xs text-destructive hover:underline" disabled={deletingReview}>
+                                {deletingReview ? "Deleting..." : "Delete"}
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 {showComments && (
@@ -242,7 +340,17 @@ const ReviewSection = ({ mediaId, initialReviews, isLoggedIn, userId }: ReviewSe
                 {reviews.length > 0 ? (
                     <div className="space-y-4">
                         {reviews.map((review) => (
-                            <ReviewCard key={review.id} review={review} userId={userId} />
+                            <ReviewCard
+                                key={review.id}
+                                review={review}
+                                userId={userId}
+                                onReviewUpdated={(updatedReview) => {
+                                    setReviews((prev) => prev.map((r) => (r.id === updatedReview.id ? updatedReview : r)));
+                                }}
+                                onReviewDeleted={(reviewId) => {
+                                    setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+                                }}
+                            />
                         ))}
                     </div>
                 ) : (

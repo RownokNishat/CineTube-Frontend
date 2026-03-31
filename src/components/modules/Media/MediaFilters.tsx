@@ -97,8 +97,71 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
                 <SelectContent>
                     <SelectItem value="createdAt">Latest</SelectItem>
                     <SelectItem value="averageRating">Top Rated</SelectItem>
+                    <SelectItem value="reviewCount">Most Reviewed</SelectItem>
+                    <SelectItem value="popularity">Most Popular</SelectItem>
                     <SelectItem value="releaseYear">Release Year</SelectItem>
                     <SelectItem value="title">Title A-Z</SelectItem>
+                </SelectContent>
+            </Select>
+
+            <Input
+                type="number"
+                min={1900}
+                max={2100}
+                placeholder="Year"
+                defaultValue={searchParams.get("releaseYear") ?? ""}
+                className="w-28"
+                onBlur={(e) => updateParam("releaseYear", e.target.value || null)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        const target = e.currentTarget as HTMLInputElement;
+                        updateParam("releaseYear", target.value || null);
+                    }
+                }}
+            />
+
+            <Input
+                type="number"
+                min={0}
+                max={10}
+                step={0.1}
+                placeholder="Min rating"
+                defaultValue={searchParams.get("minRating") ?? ""}
+                className="w-32"
+                onBlur={(e) => updateParam("minRating", e.target.value || null)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        const target = e.currentTarget as HTMLInputElement;
+                        updateParam("minRating", target.value || null);
+                    }
+                }}
+            />
+
+            <Input
+                placeholder="Platform"
+                defaultValue={searchParams.get("streamingPlatform") ?? ""}
+                className="w-36"
+                onBlur={(e) => updateParam("streamingPlatform", e.target.value || null)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        const target = e.currentTarget as HTMLInputElement;
+                        updateParam("streamingPlatform", target.value || null);
+                    }
+                }}
+            />
+
+            <Select value={searchParams.get("popularity") ?? "all"} onValueChange={(v) => updateParam("popularity", v)}>
+                <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Popularity" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Popularity</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
                 </SelectContent>
             </Select>
 

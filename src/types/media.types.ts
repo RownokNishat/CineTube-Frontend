@@ -33,7 +33,10 @@ export interface MediaQueryParams {
     mediaType?: "MOVIE" | "SERIES";
     pricingType?: "FREE" | "PREMIUM";
     genre?: string;
+    streamingPlatform?: string;
     releaseYear?: number;
+    minRating?: number;
+    popularity?: string;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
 }
