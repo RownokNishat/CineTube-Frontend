@@ -107,21 +107,29 @@ export default async function UserDashboard() {
                 <CardContent>
                     {watchlist.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                            {watchlist.slice(0, 6).map((item) => (
-                                <Link key={item.id} href={`/media/${item.mediaId}`} className="group">
-                                    <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted relative">
-                                        {item.media?.posterUrl ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={item.media.posterUrl} alt={item.media.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <Film className="size-6 text-muted-foreground" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className="text-xs mt-1 line-clamp-1 group-hover:text-primary">{item.media?.title}</p>
-                                </Link>
-                            ))}
+                            {watchlist.slice(0, 6).map((item) => {
+                                const targetMediaId = item.mediaId || item.media?.id;
+
+                                if (!targetMediaId) {
+                                    return null;
+                                }
+
+                                return (
+                                    <Link key={item.id} href={`/media/${targetMediaId}`} className="group">
+                                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted relative">
+                                            {item.media?.posterUrl ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={item.media.posterUrl} alt={item.media.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <Film className="size-6 text-muted-foreground" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="text-xs mt-1 line-clamp-1 group-hover:text-primary">{item.media?.title}</p>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="text-center py-8 text-muted-foreground">
