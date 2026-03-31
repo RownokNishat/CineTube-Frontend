@@ -1,9 +1,9 @@
 
-import AppointmentBarChart from "@/components/shared/AppointmentBarChart";
-import AppointmentPieChart from "@/components/shared/AppointmentPieChart";
 import StatsCard from "@/components/shared/StatsCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDashboardData } from "@/services/dashboard.services";
+import { format } from "date-fns";
 import { AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +37,14 @@ const PaymentsManagementPage = async () => {
   const paymentCount = Number(data.paymentCount || 0);
   const totalRevenue = Number(data.totalRevenue || 0);
   const avgPaymentValue = paymentCount > 0 ? totalRevenue / paymentCount : 0;
+  const monthlyTrend = (data.barChartData || []).map((item) => ({
+    month: format(new Date(item.month), "MMM yyyy"),
+    count: Number(item.count || 0),
+  }));
+  const statusDistribution = (data.pieChartData || []).map((item) => ({
+    status: item.status,
+    count: Number(item.count || 0),
+  }));
 
   return (
     <div className="space-y-6">
@@ -74,13 +82,46 @@ const PaymentsManagementPage = async () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-6">
-        <AppointmentBarChart data={data.barChartData || []} />
-        <AppointmentPieChart
-          data={data.pieChartData || []}
-          title="Payment Status Mix"
-          description="Distribution of payment outcomes"
-        />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Payment Trend</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {monthlyTrend.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No monthly data available.</p>
+            ) : (
+              <div className="space-y-2">
+                {monthlyTrend.map((item) => (
+                  <div key={item.month} className="flex items-center justify-between rounded border p-2 text-sm">
+                    <span className="text-muted-foreground">{item.month}</span>
+                    <span className="font-medium">{item.count} payments</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Status Mix</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {statusDistribution.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No status distribution data available.</p>
+            ) : (
+              <div className="space-y-2">
+                {statusDistribution.map((item) => (
+                  <div key={item.status} className="flex items-center justify-between rounded border p-2 text-sm">
+                    <span className="text-muted-foreground">{item.status}</span>
+                    <span className="font-medium">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
