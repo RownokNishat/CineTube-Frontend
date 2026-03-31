@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { getWatchlist, removeFromWatchlist, clearWatchlist } from "@/services/watchlist.services"
+import { clearWatchlistAction, getWatchlistAction, removeFromWatchlistAction } from "@/app/_actions/watchlist.actions"
 import { WatchlistItem } from "@/types/subscription.types"
 import { toast } from "sonner"
 
@@ -26,11 +26,11 @@ export default function WatchlistPage() {
     const loadWatchlist = async () => {
         try {
             setLoading(true)
-            const result = await getWatchlist()
+            const result = await getWatchlistAction()
             if (result.success && "data" in result) {
                 setWatchlist(result.data ?? [])
             } else {
-                toast.error("Failed to load watchlist")
+                toast.error(result.message || "Failed to load watchlist")
             }
         } catch (error) {
             console.error("Error loading watchlist:", error)
@@ -48,7 +48,7 @@ export default function WatchlistPage() {
 
         try {
             setRemoving(mediaId)
-            const result = await removeFromWatchlist(mediaId)
+            const result = await removeFromWatchlistAction(mediaId)
             if (result.success) {
                 setWatchlist(watchlist.filter(item => item.mediaId !== mediaId))
                 toast.success(`Removed "${title}" from watchlist`)
@@ -66,7 +66,7 @@ export default function WatchlistPage() {
     const handleClearWatchlist = async () => {
         try {
             setIsClearing(true)
-            const result = await clearWatchlist()
+            const result = await clearWatchlistAction()
             if (result.success) {
                 setWatchlist([])
                 setShowClearDialog(false)
