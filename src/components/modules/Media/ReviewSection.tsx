@@ -327,6 +327,7 @@ const ReviewCard = ({
                                 {comments.map((c) => (
                                     <div key={c.id} className="flex gap-2 text-sm">
                                         <Avatar className="size-6 shrink-0">
+                                            <AvatarImage src={c.user?.image ?? ""} />
                                             <AvatarFallback className="text-xs">{c.user?.name?.[0]}</AvatarFallback>
                                         </Avatar>
                                         <div>

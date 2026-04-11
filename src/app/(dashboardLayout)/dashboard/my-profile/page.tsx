@@ -1,4 +1,5 @@
 import { getUserInfo } from "@/services/auth.services";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,11 +26,12 @@ export default async function UserProfilePage() {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className="flex items-center gap-4 mb-8">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-primary">
+                <Avatar className="h-16 w-16">
+                    <AvatarImage src={userInfo.image ?? ""} alt={userInfo.name || "User"} />
+                    <AvatarFallback className="text-2xl font-bold text-primary">
                         {userInfo.name?.charAt(0).toUpperCase() || "U"}
-                    </span>
-                </div>
+                    </AvatarFallback>
+                </Avatar>
                 <div>
                     <h1 className="text-3xl font-bold">{userInfo.name}</h1>
                     <p className="text-muted-foreground">{userInfo.email}</p>

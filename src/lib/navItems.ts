@@ -26,6 +26,7 @@ export const userNavItems: NavSection[] = [
         title: "My Content",
         items: [
             { title: "My Watchlist", href: "/dashboard/watchlist", icon: "Bookmark" },
+            { title: "Closed Chats", href: "/dashboard/closed-chats", icon: "MessageSquare" },
             { title: "Purchase History", href: "/dashboard/purchase-history", icon: "Receipt" },
             { title: "Subscription", href: "/dashboard/subscription", icon: "CreditCard" },
         ],
@@ -46,6 +47,7 @@ export const adminNavItems: NavSection[] = [
         title: "User Management",
         items: [
             { title: "Users", href: "/admin/dashboard/users-management", icon: "Users" },
+            { title: "Chats", href: "/admin/dashboard/chats", icon: "MessageSquare" },
         ],
     },
     {

@@ -46,7 +46,7 @@ function HomeSection({
                 </Button>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
-                {items.map((media) => (
+                {items.slice(0, 4).map((media) => (
                     <MediaCard key={media.id} media={media} />
                 ))}
             </div>
@@ -56,20 +56,20 @@ function HomeSection({
 
 export default async function Home() {
     const [topRated, newlyAdded, movies, series, featuredCandidates, editorPickCandidates, genresRes] = await Promise.all([
-        fetchMedia({ sortBy: "averageRating", sortOrder: "desc", limit: 8 }),
-        fetchMedia({ sortBy: "createdAt", sortOrder: "desc", limit: 8 }),
+        fetchMedia({ sortBy: "averageRating", sortOrder: "desc", limit: 4 }),
+        fetchMedia({ sortBy: "createdAt", sortOrder: "desc", limit: 4 }),
         fetchMedia({ mediaType: "MOVIE", limit: 4 }),
         fetchMedia({ mediaType: "SERIES", limit: 4 }),
         fetchMedia({ featured: true, sortBy: "averageRating", sortOrder: "desc", limit: 5 }),
-        fetchMedia({ editorPick: true, sortBy: "averageRating", sortOrder: "desc", limit: 8 }),
+        fetchMedia({ editorPick: true, sortBy: "averageRating", sortOrder: "desc", limit: 4 }),
         getGenres().catch(() => ({ data: [] })),
     ]);
 
     const genres = genresRes.data ?? [];
     const featured = featuredCandidates.length > 0 ? featuredCandidates[0] : topRated[0] ?? newlyAdded[0] ?? null;
     const editorPicks = editorPickCandidates.length > 0
-        ? editorPickCandidates
-        : [...topRated.filter((item) => item.pricingType === "PREMIUM"), ...newlyAdded].slice(0, 8);
+        ? editorPickCandidates.slice(0, 4)
+        : [...topRated.filter((item) => item.pricingType === "PREMIUM"), ...newlyAdded].slice(0, 4);
 
     return (
         <div className="min-h-screen">

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UserInfo } from "@/types/user.types"
 import { Key, LogOut, User } from "lucide-react"
@@ -13,9 +14,12 @@ const UserDropdown = ({ userInfo }: UserDropdownProps) => {
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
             <Button variant={"outline"} size={"icon"} className="rounded-full">
-                <span className="text-sm font-semibold">
-                    {userInfo.name.charAt(0).toUpperCase()}
-                </span>
+                <Avatar className="size-8">
+                    <AvatarImage src={userInfo.image ?? ""} alt={userInfo.name} />
+                    <AvatarFallback className="text-sm font-semibold">
+                        {userInfo.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                </Avatar>
             </Button>
         </DropdownMenuTrigger>
 

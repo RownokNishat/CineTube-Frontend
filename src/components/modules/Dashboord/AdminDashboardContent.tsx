@@ -5,7 +5,7 @@ import AppointmentPieChart from "@/components/shared/AppointmentPieChart"
 import StatsCard from "@/components/shared/StatsCard"
 import { getDashboardData } from "@/services/dashboard.services"
 import { ApiResponse } from "@/types/api.types"
-import { IAdminDashboardData } from "@/types/dashboard.types"
+import { PaymentDashboardData } from "@/types/dashboard.types"
 import { useQuery } from "@tanstack/react-query"
 
 const AdminDashboardContent = () => {
@@ -15,26 +15,27 @@ const AdminDashboardContent = () => {
     refetchOnWindowFocus: "always", // Refetch the data when the window regains focus
   });
 
-  const data = (adminDashboardData as ApiResponse<IAdminDashboardData> | undefined)?.data;
+  const data = (adminDashboardData as ApiResponse<PaymentDashboardData> | undefined)?.data;
+  const pieData = data?.purchaseStatusBreakdown ?? [];
 
   return (
     <div>
       <StatsCard
-        title="Total Appointments"
-        value={data?.appointmentCount || 0}
+        title="Total Payments"
+        value={data?.overview?.paymentCount || 0}
         iconName="CalendarDays"
-        description="Number of appointments scheduled"
+        description="Completed payments in selected period"
       />
       <StatsCard
-        title="Total Patients"
-        value={data?.patientCount || 0}
+        title="Paying Users"
+        value={data?.overview?.userCount || 0}
         iconName="Users"
-        description="Number of patients registered"
+        description="Unique users with transactions"
       />
 
       <AppointmentBarChart data={data?.barChartData || []} />
 
-      <AppointmentPieChart data={data?.pieChartData || []} />
+      <AppointmentPieChart data={pieData} title="Purchase Status" description="Distribution by status" />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
     createSession, 
     getMySessions, 
@@ -23,9 +24,11 @@ export default function ChatWidget() {
     const [viewState, setViewState] = useState<ViewState>("LOADING");
     const [userRole, setUserRole] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    const [activeSessionStatus, setActiveSessionStatus] = useState<"OPEN" | "RESOLVED" | null>(null);
     
     // Admin state
     const [sessions, setSessions] = useState<any[]>([]);
+    const [sessionFilter, setSessionFilter] = useState<"ALL" | "OPEN" | "RESOLVED">("ALL");
     
     // Active chat state
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -59,6 +62,7 @@ export default function ChatWidget() {
             const res = await getAdminSessions();
             if (res.success) {
                 setSessions(res.data);
+                setActiveSessionStatus(null);
                 setViewState("SESSION_LIST");
             }
         } else {
@@ -66,6 +70,7 @@ export default function ChatWidget() {
             const res = await createSession();
             if (res.success && res.data) {
                 setActiveSessionId(res.data.id);
+                setActiveSessionStatus(res.data.status);
                 loadMessages(res.data.id);
                 setViewState("CHAT");
             }
@@ -87,7 +92,7 @@ export default function ChatWidget() {
 
     const handleSendMessage = async (e?: React.FormEvent, imageStr?: string) => {
         e?.preventDefault();
-        if ((!inputText.trim() && !imageStr) || !activeSessionId || isSending) return;
+        if ((!inputText.trim() && !imageStr) || !activeSessionId || isSending || activeSessionStatus !== "OPEN") return;
 
         setIsSending(true);
         const textCache = inputText;
@@ -101,6 +106,12 @@ export default function ChatWidget() {
 
         if (res.success) {
             await loadMessages(activeSessionId);
+            if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
+                const refreshedSessions = await getAdminSessions();
+                if (refreshedSessions.success) {
+                    setSessions(refreshedSessions.data);
+                }
+            }
         } else {
             // Restore if failed
             setInputText(textCache);
@@ -120,27 +131,35 @@ export default function ChatWidget() {
     };
 
     const openAdminSession = (sessionId: string) => {
+        const selectedSession = sessions.find((session) => session.id === sessionId);
         setActiveSessionId(sessionId);
+        setActiveSessionStatus(selectedSession?.status ?? null);
         setViewState("CHAT");
         loadMessages(sessionId);
     };
 
     const resolveSession = async () => {
-        if (!activeSessionId) return;
-        await updateSessionStatus(activeSessionId, "RESOLVED");
-        // Admins go back to list, Users can stay or get a new session
-        if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
-            setViewState("SESSION_LIST");
-            initializeChat();
-        } else {
-            initializeChat();
+        if (!activeSessionId || activeSessionStatus !== "OPEN") return;
+        const result = await updateSessionStatus(activeSessionId, "RESOLVED");
+        if (!result.success) {
+            return;
         }
+
+        setActiveSessionStatus("RESOLVED");
+        setSessions((prev) => prev.map((session) =>
+            session.id === activeSessionId ? { ...session, status: "RESOLVED" } : session,
+        ));
     };
+
+    const filteredSessions = sessions.filter((session) => {
+        if (sessionFilter === "ALL") return true;
+        return session.status === sessionFilter;
+    });
 
     return (
         <div className="fixed bottom-6 right-6 z-50">
             {isOpen ? (
-                <Card className="w-80 sm:w-96 h-[500px] flex flex-col shadow-2xl border-primary/20 animate-in slide-in-from-bottom-5">
+                <Card className="h-125 w-80 sm:w-96 flex flex-col shadow-2xl border-primary/20 animate-in slide-in-from-bottom-5">
                     <CardHeader className="bg-primary/10 py-3 border-b flex flex-row items-center justify-between space-y-0 relative">
                         <div className="flex items-center gap-2">
                             {viewState === "CHAT" && (userRole === "ADMIN" || userRole === "SUPER_ADMIN") && (
@@ -163,7 +182,7 @@ export default function ChatWidget() {
                             </div>
                         </div>
                         <div className="flex items-center gap-1">
-                            {viewState === "CHAT" && (
+                            {viewState === "CHAT" && activeSessionStatus === "OPEN" && (
                                 <Button title="Resolve Chat" variant="ghost" size="icon" className="size-8 text-green-600 hover:bg-green-100" onClick={resolveSession}>
                                     <CheckCircle2 className="size-4" />
                                 </Button>
@@ -190,43 +209,108 @@ export default function ChatWidget() {
 
                         {viewState === "SESSION_LIST" && (
                             <div className="space-y-2">
-                                {sessions.length === 0 ? (
+                                <div className="flex items-center gap-2 pb-2">
+                                    <Button size="sm" variant={sessionFilter === "ALL" ? "default" : "outline"} onClick={() => setSessionFilter("ALL")}>All</Button>
+                                    <Button size="sm" variant={sessionFilter === "OPEN" ? "default" : "outline"} onClick={() => setSessionFilter("OPEN")}>Open</Button>
+                                    <Button size="sm" variant={sessionFilter === "RESOLVED" ? "default" : "outline"} onClick={() => setSessionFilter("RESOLVED")}>Closed</Button>
+                                </div>
+                                {filteredSessions.length === 0 ? (
                                     <p className="text-center text-sm text-muted-foreground mt-10">No active sessions.</p>
                                 ) : (
-                                    sessions.map((session) => (
-                                        <div 
-                                            key={session.id} 
-                                            onClick={() => openAdminSession(session.id)}
-                                            className="p-3 bg-card border rounded-lg cursor-pointer hover:bg-muted transition-colors flex justify-between items-center"
-                                        >
-                                            <div className="overflow-hidden">
-                                                <p className="font-semibold text-sm truncate">{session.user?.name || "User"}</p>
-                                                <p className="text-xs text-muted-foreground truncate">{session.messages?.[0]?.content || "No messages yet"}</p>
-                                            </div>
-                                            <div className="flex flex-col items-end shrink-0 ml-2">
-                                                <div className={`size-2 rounded-full ${session.status === "OPEN" ? "bg-green-500" : "bg-gray-400"}`}></div>
-                                            </div>
-                                        </div>
-                                    ))
+                                    <div className="rounded-md border overflow-hidden">
+                                        <table className="w-full text-xs">
+                                            <thead className="bg-muted/70">
+                                                <tr>
+                                                    <th className="text-left px-2 py-2">User</th>
+                                                    <th className="text-left px-2 py-2">Latest</th>
+                                                    <th className="text-left px-2 py-2">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredSessions.map((session) => (
+                                                    <tr
+                                                        key={session.id}
+                                                        onClick={() => openAdminSession(session.id)}
+                                                        className="cursor-pointer border-t hover:bg-muted/40"
+                                                    >
+                                                        <td className="px-2 py-2 font-medium">{session.user?.name || "User"}</td>
+                                                        <td className="max-w-35 truncate px-2 py-2 text-muted-foreground">{session.messages?.[0]?.content || "No messages"}</td>
+                                                        <td className="px-2 py-2">
+                                                            <span className={session.status === "OPEN" ? "text-green-600" : "text-gray-500"}>
+                                                                {session.status === "RESOLVED" ? "CLOSED" : session.status}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 )}
                             </div>
                         )}
 
-                        {viewState === "CHAT" && messages.map((msg) => (
-                            <div key={msg.id} className={`flex flex-col ${msg.senderId === userId ? "items-end" : "items-start"}`}>
-                                <div className={`max-w-[80%] rounded-2xl p-3 ${msg.senderId === userId ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card border shadow-sm rounded-bl-none"}`}>
-                                    {msg.imageUrl && (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={msg.imageUrl} alt="uploaded" className="max-w-full rounded-md mb-2 object-cover" />
-                                    )}
-                                    {msg.content && <p className="text-sm break-words whitespace-pre-wrap">{msg.content}</p>}
+                        {viewState === "CHAT" && (
+                            (userRole === "ADMIN" || userRole === "SUPER_ADMIN") ? (
+                                <div className="grid grid-cols-12 gap-3 h-full">
+                                    <div className="col-span-4 border rounded-md overflow-y-auto bg-card">
+                                        {filteredSessions.map((session) => (
+                                            <button
+                                                key={session.id}
+                                                type="button"
+                                                onClick={() => openAdminSession(session.id)}
+                                                className={`w-full text-left px-2 py-2 border-b hover:bg-muted/50 ${session.id === activeSessionId ? "bg-muted" : ""}`}
+                                            >
+                                                <p className="text-xs font-semibold truncate">{session.user?.name || "User"}</p>
+                                                <p className="text-[11px] text-muted-foreground truncate">{session.messages?.[0]?.content || "No messages"}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="col-span-8 overflow-y-auto pr-1">
+                                        {messages.map((msg) => (
+                                            <div key={msg.id} className={`flex gap-2 mb-2 ${msg.senderId === userId ? "justify-end" : "justify-start"}`}>
+                                                {msg.senderId !== userId && (
+                                                    <Avatar className="size-7 mt-1">
+                                                        <AvatarImage src={msg.sender?.image ?? ""} />
+                                                        <AvatarFallback className="text-[10px]">{msg.sender?.name?.[0] ?? "U"}</AvatarFallback>
+                                                    </Avatar>
+                                                )}
+                                                <div className={`max-w-[85%] rounded-2xl p-3 ${msg.senderId === userId ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card border shadow-sm rounded-bl-none"}`}>
+                                                    {msg.imageUrl && (
+                                                        // eslint-disable-next-line @next/next/no-img-element
+                                                        <img src={msg.imageUrl} alt="uploaded" className="max-w-full rounded-md mb-2 object-cover" />
+                                                    )}
+                                                    {msg.content && <p className="text-sm wrap-break-word whitespace-pre-wrap">{msg.content}</p>}
+                                                    <span className="text-[10px] opacity-70 mt-1 block">
+                                                        {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <span className="text-[10px] text-muted-foreground mt-1 px-1 flex items-center gap-1">
-                                    {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
-                                    {msg.senderId === userId && <CheckCircle2 className="size-3 text-primary" />}
-                                </span>
-                            </div>
-                        ))}
+                            ) : (
+                                messages.map((msg) => (
+                                    <div key={msg.id} className={`flex gap-2 ${msg.senderId === userId ? "justify-end" : "justify-start"}`}>
+                                        {msg.senderId !== userId && (
+                                            <Avatar className="size-7 mt-1">
+                                                <AvatarImage src={msg.sender?.image ?? ""} />
+                                                <AvatarFallback className="text-[10px]">{msg.sender?.name?.[0] ?? "U"}</AvatarFallback>
+                                            </Avatar>
+                                        )}
+                                        <div className={`max-w-[80%] rounded-2xl p-3 ${msg.senderId === userId ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card border shadow-sm rounded-bl-none"}`}>
+                                            {msg.imageUrl && (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={msg.imageUrl} alt="uploaded" className="max-w-full rounded-md mb-2 object-cover" />
+                                            )}
+                                            {msg.content && <p className="text-sm wrap-break-word whitespace-pre-wrap">{msg.content}</p>}
+                                            <span className="text-[10px] opacity-70 mt-1 block">
+                                                {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            )
+                        )}
                         {viewState === "CHAT" && messages.length === 0 && (
                             <div className="h-full flex items-center justify-center text-muted-foreground flex-col gap-2">
                                 <Inbox className="size-10 opacity-20" />
@@ -236,7 +320,7 @@ export default function ChatWidget() {
                         <div ref={messagesEndRef} />
                     </CardContent>
 
-                    {viewState === "CHAT" && (
+                    {viewState === "CHAT" && activeSessionStatus === "OPEN" && (
                         <CardFooter className="p-3 bg-background border-t">
                             <form onSubmit={handleSendMessage} className="flex items-center gap-2 w-full">
                                 <Label htmlFor="chat-image-upload" className="cursor-pointer shrink-0">
@@ -256,6 +340,11 @@ export default function ChatWidget() {
                                     <Send className="size-4" />
                                 </Button>
                             </form>
+                        </CardFooter>
+                    )}
+                    {viewState === "CHAT" && activeSessionStatus === "RESOLVED" && (
+                        <CardFooter className="p-3 bg-background border-t text-sm text-muted-foreground">
+                            This conversation is closed. Sending is disabled for closed chats.
                         </CardFooter>
                     )}
                 </Card>

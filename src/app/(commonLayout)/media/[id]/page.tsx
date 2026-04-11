@@ -54,7 +54,7 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
     if (user) {
         try {
             const watchlistRes = await getWatchlist();
-            isInWatchlist = (watchlistRes.data ?? []).some((item) => item.mediaId === id);
+            isInWatchlist = (watchlistRes.data ?? []).some((item) => item.mediaId === id || item.media?.id === id);
         } catch { /* ignore */ }
 
     }

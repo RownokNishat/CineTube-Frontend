@@ -7,12 +7,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { UserProfile } from "@/services/user.services"
 import { IUpdateProfilePayload, updateProfileZodSchema } from "@/zod/auth.validation"
 import { useForm } from "@tanstack/react-form"
 import { useMutation } from "@tanstack/react-query"
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ChangeEvent } from "react"
 
 interface MyProfileFormProps {
     profile: UserProfile
@@ -49,6 +50,26 @@ export default function MyProfileForm({ profile }: MyProfileFormProps) {
         const name = form.state.values.name?.trim() || profile.name || "U"
         return name.charAt(0).toUpperCase()
     }, [form.state.values.name, profile.name])
+
+    const handleImageFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        if (!file.type.startsWith("image/")) {
+            setServerError("Please select a valid image file")
+            return
+        }
+
+        const reader = new FileReader()
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                form.setFieldValue("image", reader.result)
+                setServerError(null)
+            }
+        }
+        reader.onerror = () => setServerError("Failed to read selected image")
+        reader.readAsDataURL(file)
+    }
 
     return (
         <div className="space-y-6">
@@ -98,6 +119,7 @@ export default function MyProfileForm({ profile }: MyProfileFormProps) {
                             validators={{
                                 onChange: ({ value }) => {
                                     if (!value) return undefined
+                                    if (value.startsWith("data:image/")) return undefined
                                     try {
                                         new URL(value)
                                         return undefined
@@ -115,6 +137,18 @@ export default function MyProfileForm({ profile }: MyProfileFormProps) {
                                 />
                             )}
                         </form.Field>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="profile-image-file">Upload Profile Image</Label>
+                            <input
+                                id="profile-image-file"
+                                type="file"
+                                accept="image/*"
+                                className="block w-full text-sm"
+                                onChange={handleImageFileChange}
+                            />
+                            <p className="text-xs text-muted-foreground">Choose an image from your device or provide an image URL above.</p>
+                        </div>
 
                         <div className="rounded-md border bg-muted/30 p-3 text-sm">
                             <p><span className="font-medium">Email:</span> {profile.email}</p>

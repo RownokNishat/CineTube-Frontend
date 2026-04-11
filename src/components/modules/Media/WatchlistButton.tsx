@@ -3,7 +3,8 @@ import { addToWatchlistAction, removeFromWatchlistAction } from "@/app/_actions/
 import { Button } from "@/components/ui/button";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface WatchlistButtonProps {
@@ -15,6 +16,11 @@ interface WatchlistButtonProps {
 const WatchlistButton = ({ mediaId, isInWatchlist: initial, isLoggedIn }: WatchlistButtonProps) => {
     const [inWatchlist, setInWatchlist] = useState(initial);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        setInWatchlist(initial);
+    }, [initial]);
 
     const handleToggle = async () => {
         if (!isLoggedIn) {
@@ -29,8 +35,9 @@ const WatchlistButton = ({ mediaId, isInWatchlist: initial, isLoggedIn }: Watchl
             if (!result.success) {
                 toast.error(result.message || "Failed to update watchlist");
             } else {
-                setInWatchlist(!inWatchlist);
+                setInWatchlist((prev) => !prev);
                 toast.success(inWatchlist ? "Removed from watchlist" : "Added to watchlist");
+                router.refresh();
             }
         } finally {
             setLoading(false);
@@ -45,7 +52,7 @@ const WatchlistButton = ({ mediaId, isInWatchlist: initial, isLoggedIn }: Watchl
             </Button>
             {isLoggedIn && inWatchlist && (
                 <Button variant="outline" size="icon" asChild title="View watchlist">
-                    <Link href="/watchlist">
+                    <Link href="/dashboard/watchlist">
                         <BookmarkCheck className="size-4" />
                     </Link>
                 </Button>
