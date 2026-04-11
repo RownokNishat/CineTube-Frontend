@@ -39,6 +39,7 @@ const Navbar = async () => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Pricing</Link>
+                    <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Blog</Link>
                     <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">About</Link>
                     <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-colors font-medium">FAQ</Link>
                     <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Contact</Link>

@@ -30,6 +30,7 @@ export default function Footer() {
                         <li><Link href="/media?mediaType=SERIES" className="hover:text-white transition-colors">TV Series</Link></li>
                         <li><Link href="/pricing" className="hover:text-white transition-colors">Premium Plans</Link></li>
                         <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                        <li><Link href="/blog" className="hover:text-white transition-colors">Our Blog</Link></li>
                     </ul>
                 </div>
 
