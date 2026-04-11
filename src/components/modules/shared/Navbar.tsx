@@ -17,13 +17,31 @@ const Navbar = async () => {
                     <span className="hidden sm:inline">CineTube</span>
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm flex-1 ml-8 lg:ml-12\">
-                    <Link href="/media" className="text-muted-foreground hover:text-foreground transition-colors">Movies &amp; Series</Link>
-                    <Link href="/media?mediaType=MOVIE" className="text-muted-foreground hover:text-foreground transition-colors">Movies</Link>
-                    <Link href="/media?mediaType=SERIES" className="text-muted-foreground hover:text-foreground transition-colors">Series</Link>
-                    <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
-                    <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
-                    <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
+                <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm flex-1 ml-8 lg:ml-12">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground transition-colors outline-none cursor-pointer font-medium flex items-center gap-1">
+                            Browse <span className="text-[10px]">▼</span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-48">
+                            <DropdownMenuItem asChild>
+                                <Link href="/media" className="cursor-pointer">All Movies &amp; Series</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/media?mediaType=MOVIE" className="cursor-pointer">Movies Only</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/media?mediaType=SERIES" className="cursor-pointer">TV Series</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <Link href="/media?pricingType=PREMIUM" className="cursor-pointer text-primary">Premium Content</Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Pricing</Link>
+                    <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">About</Link>
+                    <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-colors font-medium">FAQ</Link>
+                    <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Contact</Link>
                 </nav>
 
                 <div className="flex items-center gap-2 sm:gap-3\">

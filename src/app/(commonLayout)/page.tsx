@@ -8,6 +8,9 @@ import { Media } from "@/types/media.types";
 import { ArrowRight, Clapperboard, Compass, Film, Search, Sparkles, Star, Tv } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
+import FAQSection from "@/components/modules/Home/FAQSection";
+import NewsletterSection from "@/components/modules/Home/NewsletterSection";
+import TestimonialSection from "@/components/modules/Home/TestimonialSection";
 
 async function fetchMedia(params: object): Promise<Media[]> {
     try {
@@ -253,8 +256,10 @@ export default async function Home() {
                 </div>
             </section>
 
-            {/* Pricing */}
+            <TestimonialSection />
             <PricingSection />
+            <FAQSection />
+            <NewsletterSection />
         </div>
     );
 }
