@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Film, Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Film, Facebook, Github, Linkedin, Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
     return (
@@ -15,10 +15,9 @@ export default function Footer() {
                         Your ultimate destination for discovering, rating, and exploring the best movies and TV series curated globally.
                     </p>
                     <div className="flex items-center gap-4 pt-2">
-                        <Link href="#" className="hover:text-white transition-colors"><Facebook className="size-5" /></Link>
-                        <Link href="#" className="hover:text-white transition-colors"><Twitter className="size-5" /></Link>
-                        <Link href="#" className="hover:text-white transition-colors"><Instagram className="size-5" /></Link>
-                        <Link href="#" className="hover:text-white transition-colors"><Youtube className="size-5" /></Link>
+                        <Link href="https://www.facebook.com/rownokjahan.nishat#" target="_blank" rel="noreferrer" className="hover:text-white hover:scale-110 transition-all"><Facebook className="size-5" /></Link>
+                        <Link href="https://github.com/RownokNishat" target="_blank" rel="noreferrer" className="hover:text-white hover:scale-110 transition-all"><Github className="size-5" /></Link>
+                        <Link href="https://www.linkedin.com/in/rownok-jahan-nishat/" target="_blank" rel="noreferrer" className="hover:text-white hover:scale-110 transition-all"><Linkedin className="size-5" /></Link>
                     </div>
                 </div>
 
