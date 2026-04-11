@@ -6,6 +6,7 @@ import { Film, Star, Users, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import AdminCharts from "@/components/modules/Admin/AdminCharts"
 
 export const dynamic = "force-dynamic";
 
@@ -118,6 +119,8 @@ export default async function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            <AdminCharts />
         </div>
     );
 }

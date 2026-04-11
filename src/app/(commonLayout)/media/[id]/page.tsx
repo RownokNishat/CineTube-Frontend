@@ -4,7 +4,7 @@ import PurchaseButton from "@/components/modules/Media/PurchaseButton";
 import RentButton from "@/components/modules/Media/RentButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getMediaById, getUserMediaAccess, verifyMediaPurchase } from "@/services/media.services";
+import { getMediaById, getUserMediaAccess, verifyMediaPurchase, getMediaList } from "@/services/media.services";
 import { getAdminMediaReviews, getReviews } from "@/services/review.services";
 import { getWatchlist } from "@/services/watchlist.services";
 import { getUserInfo } from "@/services/auth.services";
@@ -12,6 +12,7 @@ import { Calendar, Clock, ExternalLink, Film, Star, Tv, Users } from "lucide-rea
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import MediaCard from "@/components/modules/Media/MediaCard";
 
 interface MediaDetailPageProps {
     params: Promise<{ id: string }>;
@@ -39,6 +40,12 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
 
     const media = mediaRes.data;
     const reviews = reviewsRes.data ?? [];
+
+    const relatedRes = await getMediaList({ 
+        mediaType: media.mediaType, 
+        limit: 5 
+    }).catch(() => ({ data: [] }));
+    const relatedItems = (relatedRes.data || []).filter((m) => m.id !== id).slice(0, 4);
 
     // Check if media is in user's watchlist
     let isInWatchlist = false;
@@ -210,6 +217,20 @@ export default async function MediaDetailPage({ params, searchParams }: MediaDet
                 userId={user?.id}
                 isAdmin={isAdmin}
             />
+
+            {/* Related Items */}
+            {relatedItems.length > 0 && (
+                <div className="mt-16 pt-8 border-t">
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        <Film className="size-6 text-primary" /> You Might Also Like
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {relatedItems.map((item) => (
+                            <MediaCard key={item.id} media={item} />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
