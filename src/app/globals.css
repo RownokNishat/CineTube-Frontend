@@ -127,6 +127,37 @@
   }
 }
 
+/* ── Custom scrollbar ─────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--foreground) 18%, transparent);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklch, var(--foreground) 35%, transparent);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) 18%, transparent) transparent;
+}
+
 @keyframes ctFloat {
   0%,
   100% {

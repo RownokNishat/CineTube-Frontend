@@ -4,9 +4,9 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "dev": "bun --bun next dev --webpack",
-    "build": "bun --bun next build",
-    "start": "bun --bun next start",
+    "dev": "node init && bun --bun next dev --webpack",
+    "build": "node init && bun --bun next build",
+    "start": "node init && bun --bun next start",
     "lint": "npx eslint src/",
     "type-check": "npx tsc --noEmit"
   },

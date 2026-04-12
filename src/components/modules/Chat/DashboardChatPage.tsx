@@ -240,8 +240,9 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-1">
+        // flex column: header shrinks to content, grid takes all remaining height
+        <div className="flex h-[calc(100dvh-10rem)] flex-col gap-6">
+            <div className="shrink-0 space-y-1">
                 <h1 className="flex items-center gap-2 text-2xl font-semibold">
                     <MessageSquare className="size-6" />
                     {isAdminMode ? "Chat Management" : "Closed Chats"}
@@ -253,9 +254,12 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                 </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-                <Card>
-                    <CardHeader>
+            {/* Grid fills remaining height; min-h-0 lets flex children shrink below content size */}
+            <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+
+                {/* Sessions list — header fixed, list scrolls */}
+                <Card className="flex min-h-0 flex-col overflow-hidden">
+                    <CardHeader className="shrink-0">
                         <CardTitle>{isAdminMode ? "Sessions" : "Resolved Sessions"}</CardTitle>
                         <CardDescription>
                             {filteredSessions.length} conversation{filteredSessions.length === 1 ? "" : "s"}
@@ -268,7 +272,7 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                             </div>
                         )}
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="min-h-0 flex-1 overflow-y-auto space-y-2 p-4">
                         {isLoading ? (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <RefreshCw className="size-4 animate-spin" /> Loading chats...
@@ -300,15 +304,15 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                                 </button>
                             ))
                         )}
-
                         {sessionsMeta && (
                             <QueryPagination currentPage={sessionsMeta.page} totalPages={sessionsMeta.totalPages} totalItems={sessionsMeta.total} className="px-0" />
                         )}
                     </CardContent>
                 </Card>
 
-                <Card className="min-h-130">
-                    <CardHeader className="border-b">
+                {/* Conversation — header fixed, messages scroll, footer fixed */}
+                <Card className="flex min-h-0 flex-col overflow-hidden">
+                    <CardHeader className="shrink-0 border-b">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
                                 <CardTitle>
@@ -324,7 +328,6 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                                             : "Select a chat from the sidebar list."}
                                 </CardDescription>
                             </div>
-
                             {isAdminMode && activeSessionStatus === "OPEN" && (
                                 <Button onClick={handleCloseChat} disabled={isClosing}>
                                     <CheckCircle2 className="mr-2 size-4" />
@@ -334,17 +337,18 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="flex h-full flex-col p-0">
-                        <div ref={scrollContainerRef} className="flex-1 space-y-4 overflow-y-auto p-4">
+                    <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+                        {/* Scrollable messages area */}
+                        <div ref={scrollContainerRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
                             {!activeSessionId ? (
-                                <div className="flex h-full min-h-90 items-center justify-center text-center text-muted-foreground">
+                                <div className="flex h-full items-center justify-center text-center text-muted-foreground">
                                     <div className="space-y-2">
                                         <Inbox className="mx-auto size-10 opacity-30" />
                                         <p>Select a chat to view the conversation.</p>
                                     </div>
                                 </div>
                             ) : messages.length === 0 ? (
-                                <div className="flex h-full min-h-90 items-center justify-center text-center text-muted-foreground">
+                                <div className="flex h-full items-center justify-center text-center text-muted-foreground">
                                     <div className="space-y-2">
                                         <Inbox className="mx-auto size-10 opacity-30" />
                                         <p>No messages in this chat yet.</p>
@@ -353,7 +357,6 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                             ) : (
                                 messages.map((message) => {
                                     const isOwnMessage = message.senderId === currentUserId;
-
                                     return (
                                         <div key={message.id} className={`flex gap-2 ${isOwnMessage ? "justify-end" : "justify-start"}`}>
                                             {!isOwnMessage && (
@@ -376,22 +379,21 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                                     );
                                 })
                             )}
-
                             <div ref={messagesEndRef} />
                         </div>
 
+                        {/* Fixed footer: pagination + input */}
                         {activeSessionId && messagesMeta && (
                             <QueryPagination
                                 currentPage={messagesMeta.page}
                                 totalPages={messagesMeta.totalPages}
                                 totalItems={messagesMeta.total}
                                 paramName="messagePage"
-                                className="border-t px-4"
+                                className="shrink-0 border-t px-4"
                             />
                         )}
-
                         {isAdminMode && activeSessionStatus === "OPEN" && (
-                            <form onSubmit={handleSendMessage} className="border-t p-4">
+                            <form onSubmit={handleSendMessage} className="shrink-0 border-t p-4">
                                 <div className="flex gap-2">
                                     <Input
                                         value={inputText}
@@ -405,9 +407,8 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                                 </div>
                             </form>
                         )}
-
                         {activeSessionStatus === "RESOLVED" && (
-                            <div className="border-t bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                            <div className="shrink-0 border-t bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
                                 This conversation is closed. Sending is disabled for closed chats.
                             </div>
                         )}
