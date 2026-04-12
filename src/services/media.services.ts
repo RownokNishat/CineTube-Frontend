@@ -43,8 +43,8 @@ export async function getUserMediaAccess(mediaId: string): Promise<ApiResponse<{
     return httpClient.get<{ hasAccess: boolean }>(`/media/${mediaId}/access`);
 }
 
-export async function getPurchasedMedia(): Promise<ApiResponse<Media[]>> {
-    return httpClient.get<Media[]>("/media/purchases/my-purchases");
+export async function getPurchasedMedia(params?: { page?: number; limit?: number }): Promise<ApiResponse<Media[]>> {
+    return httpClient.get<Media[]>("/media/purchases/my-purchases", { params: params as Record<string, unknown> | undefined });
 }
 
 export async function verifyMediaPurchase(sessionId: string): Promise<ApiResponse<{ hasAccess: boolean; mediaId?: string; reason?: string; purchase?: { media?: { id?: string } } }>> {

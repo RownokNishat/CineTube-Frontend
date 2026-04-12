@@ -2,6 +2,7 @@ import { getPurchasedMediaAction } from "@/app/_actions/media.actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import QueryPagination from "@/components/shared/QueryPagination"
 import { format } from "date-fns"
 import { Film, Receipt } from "lucide-react"
 import Image from "next/image"
@@ -19,8 +20,18 @@ type PurchaseListItem = {
     purchasedOn: string
 }
 
-const PurchaseHistoryPage = async () => {
-    const response = await getPurchasedMediaAction()
+interface PurchaseHistoryPageProps {
+    searchParams: Promise<{
+        page?: string
+        limit?: string
+    }>
+}
+
+const PurchaseHistoryPage = async ({ searchParams }: PurchaseHistoryPageProps) => {
+    const params = await searchParams
+    const page = Math.max(1, Number(params.page ?? 1))
+    const limit = Math.max(1, Number(params.limit ?? 12))
+    const response = await getPurchasedMediaAction({ page, limit })
 
     if (!response.success) {
         return (
@@ -36,6 +47,8 @@ const PurchaseHistoryPage = async () => {
     }
 
     const rawPurchases = Array.isArray(response.data) ? response.data : []
+    const total = response.meta?.total ?? rawPurchases.length
+    const totalPages = response.meta?.totalPages ?? 1
 
     const purchases = rawPurchases.reduce<PurchaseListItem[]>((acc, item) => {
             const source = item && typeof item === "object" ? item : {}
@@ -93,7 +106,7 @@ const PurchaseHistoryPage = async () => {
                 </div>
                 <Badge variant="secondary" className="w-fit">
                     <Receipt className="mr-1 size-3" />
-                    {purchases.length} Purchases
+                    {total} Purchases
                 </Badge>
             </div>
 
@@ -149,6 +162,8 @@ const PurchaseHistoryPage = async () => {
                     ))}
                 </div>
             )}
+
+            <QueryPagination currentPage={page} totalPages={totalPages} totalItems={total} className="px-0" />
         </div>
     )
 }

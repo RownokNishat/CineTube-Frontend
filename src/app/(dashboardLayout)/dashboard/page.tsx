@@ -13,12 +13,13 @@ export const dynamic = "force-dynamic";
 export default async function UserDashboard() {
     const [user, watchlistRes, subscriptionRes, myReviewsRes] = await Promise.all([
         getUserInfo().catch(() => null),
-        getWatchlist().catch(() => ({ data: [] })),
+        getWatchlist({ page: 1, limit: 6 }).catch(() => ({ data: [], meta: { total: 0 } })),
         getMySubscription().catch(() => ({ data: null })),
         getMyReviews({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
     ]);
 
     const watchlist = watchlistRes.data ?? [];
+    const watchlistCount = (watchlistRes as { meta?: { total?: number } }).meta?.total ?? watchlist.length;
     const subscription = subscriptionRes.data;
     const reviewCount = (myReviewsRes as { meta?: { total?: number } }).meta?.total ?? 0;
 
@@ -37,7 +38,7 @@ export default async function UserDashboard() {
                             <Bookmark className="size-6 text-primary" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{watchlist.length}</p>
+                            <p className="text-2xl font-bold">{watchlistCount}</p>
                             <p className="text-sm text-muted-foreground">Watchlist Items</p>
                         </div>
                     </CardContent>
@@ -119,7 +120,7 @@ export default async function UserDashboard() {
 
                                 return (
                                     <Link key={item.id} href={`/media/${targetMediaId}`} className="group">
-                                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted relative">
+                                        <div className="aspect-2/3 rounded-lg overflow-hidden bg-muted relative">
                                             {item.media?.posterUrl ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
                                                 <img src={item.media.posterUrl} alt={item.media.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />

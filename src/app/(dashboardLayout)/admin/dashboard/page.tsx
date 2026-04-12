@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAllUsers } from "@/services/user.services";
 import { getMediaList } from "@/services/media.services";
 import { getAdminReviewStats } from "@/services/review.services";
+import { getPaymentDashboardData } from "@/services/dashboard.services";
 import { Film, Star, Users, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import AdminCharts from "@/components/modules/Admin/AdminCharts"
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-    const [usersRes, mediaRes, reviewStatsRes] = await Promise.all([
+    const [usersRes, mediaRes, reviewStatsRes, paymentAnalyticsRes, movieRes, seriesRes, freeRes, premiumRes] = await Promise.all([
         getAllUsers({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
         getMediaList({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
         getAdminReviewStats().catch(() => ({
@@ -21,6 +22,11 @@ export default async function AdminDashboardPage() {
                 recentReviews: [],
             },
         })),
+        getPaymentDashboardData(30).catch(() => ({ success: false, data: null })),
+        getMediaList({ limit: 1, mediaType: "MOVIE" }).catch(() => ({ meta: { total: 0 } })),
+        getMediaList({ limit: 1, mediaType: "SERIES" }).catch(() => ({ meta: { total: 0 } })),
+        getMediaList({ limit: 1, pricingType: "FREE" }).catch(() => ({ meta: { total: 0 } })),
+        getMediaList({ limit: 1, pricingType: "PREMIUM" }).catch(() => ({ meta: { total: 0 } })),
     ]);
 
     const reviewStats = reviewStatsRes.data ?? {
@@ -37,6 +43,28 @@ export default async function AdminDashboardPage() {
     ];
 
     const recentReviews = reviewStats.recentReviews ?? [];
+    const paymentAnalytics = paymentAnalyticsRes.success ? paymentAnalyticsRes.data : null;
+    const growthData = (paymentAnalytics?.barChartData ?? []).map((item) => {
+        const rawLabel = item.day ?? item.month;
+        const label = rawLabel ? new Date(rawLabel).toLocaleDateString("en-US", item.day ? { month: "short", day: "numeric" } : { month: "short" }) : "-";
+
+        return {
+            name: label,
+            payments: Number(item.count ?? 0),
+            revenue: Number(item.revenue ?? 0),
+        };
+    });
+    const mediaDistributionData = [
+        { name: "Movies", value: (movieRes as { meta?: { total?: number } }).meta?.total ?? 0 },
+        { name: "Series", value: (seriesRes as { meta?: { total?: number } }).meta?.total ?? 0 },
+        { name: "Free", value: (freeRes as { meta?: { total?: number } }).meta?.total ?? 0 },
+        { name: "Premium", value: (premiumRes as { meta?: { total?: number } }).meta?.total ?? 0 },
+    ];
+    const paymentTypeData = [
+        { name: "Purchase", value: Number(paymentAnalytics?.overview?.purchaseRevenue ?? 0) },
+        { name: "Subscription", value: Number(paymentAnalytics?.overview?.subscriptionRevenue ?? 0) },
+        { name: "Rental", value: Number(paymentAnalytics?.overview?.rentalRevenue ?? 0) },
+    ];
 
     return (
         <div className="space-y-6">
@@ -120,7 +148,11 @@ export default async function AdminDashboardPage() {
                 </Card>
             </div>
 
-            <AdminCharts />
+            <AdminCharts
+                growthData={growthData}
+                mediaDistributionData={mediaDistributionData}
+                paymentTypeData={paymentTypeData}
+            />
         </div>
     );
 }

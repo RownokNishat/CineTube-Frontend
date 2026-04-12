@@ -11,6 +11,7 @@ import { formatDistanceToNow } from "date-fns";
 import ReviewActionButtons from "./ReviewActionButtons";
 import { type ReviewStats } from "@/types/review.types";
 import Link from "next/link";
+import QueryPagination from "@/components/shared/QueryPagination";
 
 export const dynamic = "force-dynamic";
 
@@ -35,18 +36,24 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
 
     let reviews: Awaited<ReturnType<typeof getAdminMediaReviews>>["data"] = [];
     let total = 0;
+    let totalPages = 1;
     let stats: ReviewStats | null = null;
     let mediaCatalog: Awaited<ReturnType<typeof getMediaList>>["data"] = [];
+    let mediaCatalogTotal = 0;
+    let mediaCatalogTotalPages = 1;
 
     if (!mediaId) {
         try {
             const mediaRes = await getMediaList({
+                page,
                 limit: 50,
                 sortBy: "createdAt",
                 sortOrder: "desc",
                 searchTerm,
             });
             mediaCatalog = mediaRes.data ?? [];
+            mediaCatalogTotal = mediaRes.meta?.total ?? mediaCatalog.length;
+            mediaCatalogTotalPages = mediaRes.meta?.totalPages ?? 1;
         } catch {
             mediaCatalog = [];
         }
@@ -73,6 +80,7 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
             });
             reviews = res.data ?? [];
             total = res.meta?.total ?? 0;
+            totalPages = res.meta?.totalPages ?? 1;
 
             if (selectedStatus === "PENDING" && reviews.length === 0 && stats?.pendingReviews?.length) {
                 const reviewDetails = await Promise.all(
@@ -142,6 +150,8 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                         ) : (
                             <p className="text-sm text-muted-foreground">No media found.</p>
                         )}
+
+                        <QueryPagination currentPage={page} totalPages={mediaCatalogTotalPages} totalItems={mediaCatalogTotal} className="px-0" />
                     </CardContent>
                 </Card>
             )}
@@ -252,6 +262,8 @@ const ReviewsManagementPage = async ({ searchParams }: ReviewsManagementPageProp
                 </CardContent>
             </Card>
             )}
+
+            {mediaId && <QueryPagination currentPage={page} totalPages={totalPages} totalItems={total} className="px-0" />}
         </div>
     );
 }

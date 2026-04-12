@@ -20,10 +20,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import QueryPagination from "@/components/shared/QueryPagination";
 
 interface CommentsManagementPageProps {
     comments: Comment[];
     total: number;
+    totalPages: number;
     page: number;
     selectedStatus?: "PENDING" | "PUBLISHED" | "UNPUBLISHED";
     searchTerm?: string;
@@ -35,6 +37,7 @@ interface CommentsManagementPageProps {
 export default function CommentsManagementContent({
     comments,
     total,
+    totalPages,
     page,
     selectedStatus,
     searchTerm,
@@ -243,17 +246,7 @@ export default function CommentsManagementContent({
                 </AlertDialogContent>
             </AlertDialog>
 
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>Page {page}</span>
-                <div className="flex gap-2">
-                    {page > 1 ? (
-                        <Link href={`?page=${page - 1}`}>Previous</Link>
-                    ) : (
-                        <span>Previous</span>
-                    )}
-                    <Link href={`?page=${page + 1}`}>Next</Link>
-                </div>
-            </div>
+            <QueryPagination currentPage={page} totalPages={totalPages} totalItems={total} className="px-0" />
         </div>
     );
 }

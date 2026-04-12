@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import QueryPagination from "@/components/shared/QueryPagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getMediaList } from "@/services/media.services";
 import { Film } from "lucide-react";
@@ -36,6 +37,7 @@ export default async function MediaManagementPage({ searchParams }: MediaManagem
 
     let mediaList: Awaited<ReturnType<typeof getMediaList>>["data"] = [];
     let total = 0;
+    let totalPages = 1;
     try {
         const res = await getMediaList({
             page,
@@ -48,6 +50,7 @@ export default async function MediaManagementPage({ searchParams }: MediaManagem
         });
         mediaList = res.data ?? [];
         total = res.meta?.total ?? 0;
+        totalPages = res.meta?.totalPages ?? 1;
     } catch { /* empty */ }
 
     return (
@@ -151,6 +154,8 @@ export default async function MediaManagementPage({ searchParams }: MediaManagem
                     </Table>
                 </CardContent>
             </Card>
+
+            <QueryPagination currentPage={page} totalPages={totalPages} totalItems={total} className="px-0" />
         </div>
     );
 }

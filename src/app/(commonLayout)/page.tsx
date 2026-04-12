@@ -221,8 +221,8 @@ export default async function Home() {
             />
 
             {/* Movies & Series split */}
-            <section className="py-12 px-4 max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <section className="py-12 px-4 max-w-7xl mx-auto space-y-12">
+                <div className="grid grid-cols-1 gap-12">
                     {movies.length > 0 && (
                         <div>
                             <div className="flex items-center justify-between mb-6">
@@ -233,8 +233,8 @@ export default async function Home() {
                                     <Link href="/media?mediaType=MOVIE">View all</Link>
                                 </Button>
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {movies.map((media) => <MediaCard key={media.id} media={media} />)}
+                            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                                {movies.slice(0, 4).map((media) => <MediaCard key={media.id} media={media} />)}
                             </div>
                         </div>
                     )}
@@ -248,8 +248,8 @@ export default async function Home() {
                                     <Link href="/media?mediaType=SERIES">View all</Link>
                                 </Button>
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {series.map((media) => <MediaCard key={media.id} media={media} />)}
+                            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                                {series.slice(0, 4).map((media) => <MediaCard key={media.id} media={media} />)}
                             </div>
                         </div>
                     )}

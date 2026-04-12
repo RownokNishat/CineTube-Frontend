@@ -1,41 +1,43 @@
 "use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const barData = [
-    { name: "Jan", users: 400, media: 240, revenue: 2400 },
-    { name: "Feb", users: 300, media: 139, revenue: 2210 },
-    { name: "Mar", users: 200, media: 980, revenue: 2290 },
-    { name: "Apr", users: 278, media: 390, revenue: 2000 },
-    { name: "May", users: 189, media: 480, revenue: 2181 },
-    { name: "Jun", users: 239, media: 380, revenue: 2500 },
-];
+const COLORS = ["#0f766e", "#f59e0b", "#2563eb", "#dc2626", "#7c3aed"];
 
-const pieData = [
-  { name: 'Movies', value: 1200 },
-  { name: 'Series', value: 850 },
-  { name: 'Free', value: 700 },
-  { name: 'Premium', value: 1350 },
-];
+interface AdminChartsProps {
+    growthData: Array<{
+        name: string;
+        payments: number;
+        revenue: number;
+    }>;
+    mediaDistributionData: Array<{
+        name: string;
+        value: number;
+    }>;
+    paymentTypeData: Array<{
+        name: string;
+        value: number;
+    }>;
+}
 
-const COLORS = ['#8884d8', '#82ca9d', '#FFBB28', '#FF8042'];
-
-export default function AdminCharts() {
+export default function AdminCharts({ growthData, mediaDistributionData, paymentTypeData }: AdminChartsProps) {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-lg">Platform Growth Overview</CardTitle>
                 </CardHeader>
                 <CardContent className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barData}>
+                        <BarChart data={growthData}>
+                            <CartesianGrid vertical={false} strokeDasharray="3 3" />
                             <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                             <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}/>
+                            <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}/>
                             <Legend />
-                            <Bar dataKey="users" fill="#8884d8" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="revenue" fill="#82ca9d" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="payments" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="revenue" fill="#0f766e" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -49,7 +51,7 @@ export default function AdminCharts() {
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie
-                                data={pieData}
+                                data={mediaDistributionData}
                                 cx="50%"
                                 cy="50%"
                                 innerRadius={70}
@@ -58,11 +60,39 @@ export default function AdminCharts() {
                                 paddingAngle={5}
                                 dataKey="value"
                             >
-                                {pieData.map((entry, index) => (
+                                {mediaDistributionData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}/>
+                            <Tooltip contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}/>
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg">Payments by Type</CardTitle>
+                </CardHeader>
+                <CardContent className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={paymentTypeData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={70}
+                                outerRadius={90}
+                                fill="#8884d8"
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {paymentTypeData.map((entry, index) => (
+                                    <Cell key={`payment-cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}/>
                             <Legend />
                         </PieChart>
                     </ResponsiveContainer>

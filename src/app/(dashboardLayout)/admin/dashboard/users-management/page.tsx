@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import QueryPagination from "@/components/shared/QueryPagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAllUsers } from "@/services/user.services";
 import { formatDistanceToNow } from "date-fns";
@@ -28,6 +29,7 @@ export default async function UsersManagementPage({ searchParams }: UsersManagem
 
     let users: Awaited<ReturnType<typeof getAllUsers>>["data"] = [];
     let total = 0;
+    let totalPages = 1;
     try {
         const res = await getAllUsers({
             page,
@@ -38,6 +40,7 @@ export default async function UsersManagementPage({ searchParams }: UsersManagem
         });
         users = res.data ?? [];
         total = res.meta?.total ?? 0;
+        totalPages = res.meta?.totalPages ?? 1;
     } catch { /* empty */ }
 
     return (
@@ -137,6 +140,8 @@ export default async function UsersManagementPage({ searchParams }: UsersManagem
                     </Table>
                 </CardContent>
             </Card>
+
+            <QueryPagination currentPage={page} totalPages={totalPages} totalItems={total} className="px-0" />
         </div>
     );
 }

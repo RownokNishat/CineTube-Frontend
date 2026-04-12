@@ -5,9 +5,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import QueryPagination from "@/components/shared/QueryPagination";
 import { getAdminSessions, getMySessions, getSessionMessages, sendMessage, updateSessionStatus } from "@/services/chat.services";
+import { PaginationMeta } from "@/types/api.types";
 import { CheckCircle2, Inbox, MessageSquare, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type ChatMode = "admin" | "user-closed";
 type ChatStatus = "OPEN" | "RESOLVED";
@@ -47,16 +50,37 @@ const getDisplayName = (session: ChatSession) => session.user?.name || "User";
 
 const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
     const isAdminMode = mode === "admin";
+    const pathname = usePathname();
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [sessions, setSessions] = useState<ChatSession[]>([]);
+    const [sessionsMeta, setSessionsMeta] = useState<PaginationMeta | null>(null);
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
     const [activeSessionStatus, setActiveSessionStatus] = useState<ChatStatus | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [messagesMeta, setMessagesMeta] = useState<PaginationMeta | null>(null);
     const [inputText, setInputText] = useState("");
     const [sessionFilter, setSessionFilter] = useState<"ALL" | ChatStatus>(isAdminMode ? "ALL" : "RESOLVED");
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const sessionPage = Math.max(1, Number(searchParams.get("page") ?? 1));
+    const messagePage = Math.max(1, Number(searchParams.get("messagePage") ?? 1));
+    const selectedSessionId = searchParams.get("sessionId");
+
+    const updateQuery = useCallback((updates: Record<string, string | null>) => {
+        const params = new URLSearchParams(searchParams.toString());
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value === null) {
+                params.delete(key);
+            } else {
+                params.set(key, value);
+            }
+        });
+
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }, [pathname, router, searchParams]);
 
     const filteredSessions = useMemo(() => {
         const scopedSessions = isAdminMode ? sessions : sessions.filter((session) => session.status === "RESOLVED");
@@ -72,8 +96,8 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
         scrollToBottom();
     }, [messages, scrollToBottom]);
 
-    const loadMessages = useCallback(async (sessionId: string, status: ChatStatus) => {
-        const response = await getSessionMessages(sessionId);
+    const loadMessages = useCallback(async (sessionId: string, status: ChatStatus, page = 1) => {
+        const response = await getSessionMessages(sessionId, { page, limit: 25 });
         if (!response.success) {
             toast.error(response.message || "Failed to load chat messages");
             return;
@@ -82,16 +106,21 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
         setActiveSessionId(sessionId);
         setActiveSessionStatus(status);
         setMessages((response.data ?? []) as ChatMessage[]);
+        setMessagesMeta((response.meta ?? null) as PaginationMeta | null);
     }, []);
 
     const loadSessions = useCallback(async () => {
         setIsLoading(true);
-        const response = isAdminMode ? await getAdminSessions() : await getMySessions();
+        const response = isAdminMode
+            ? await getAdminSessions({ page: sessionPage, limit: 10 })
+            : await getMySessions({ page: sessionPage, limit: 10 });
 
         if (!response.success) {
             toast.error(response.message || "Failed to load chats");
             setSessions([]);
+            setSessionsMeta(null);
             setMessages([]);
+            setMessagesMeta(null);
             setActiveSessionId(null);
             setActiveSessionStatus(null);
             setIsLoading(false);
@@ -103,25 +132,34 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
         );
 
         setSessions(sessionData);
+        setSessionsMeta((response.meta ?? null) as PaginationMeta | null);
 
-        const nextActiveSession = sessionData.find((session) => session.id === activeSessionId) ?? sessionData[0] ?? null;
+        const nextActiveSession = sessionData.find((session) => session.id === selectedSessionId)
+            ?? sessionData.find((session) => session.id === activeSessionId)
+            ?? sessionData[0]
+            ?? null;
         if (nextActiveSession) {
-            await loadMessages(nextActiveSession.id, nextActiveSession.status);
+            if (nextActiveSession.id !== selectedSessionId) {
+                updateQuery({ sessionId: nextActiveSession.id, messagePage: "1" });
+            }
+            await loadMessages(nextActiveSession.id, nextActiveSession.status, messagePage);
         } else {
             setActiveSessionId(null);
             setActiveSessionStatus(null);
             setMessages([]);
+            setMessagesMeta(null);
         }
 
         setIsLoading(false);
-    }, [activeSessionId, isAdminMode, loadMessages]);
+    }, [activeSessionId, isAdminMode, loadMessages, messagePage, selectedSessionId, sessionPage, updateQuery]);
 
     useEffect(() => {
         void loadSessions();
     }, [loadSessions]);
 
     const handleOpenSession = async (session: ChatSession) => {
-        await loadMessages(session.id, session.status);
+        updateQuery({ sessionId: session.id, messagePage: "1" });
+        await loadMessages(session.id, session.status, 1);
     };
 
     const handleSendMessage = async (event: React.FormEvent) => {
@@ -146,8 +184,23 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
             return;
         }
 
-        await loadMessages(activeSessionId, "OPEN");
-        await loadSessions();
+        await loadMessages(activeSessionId, "OPEN", messagePage);
+        setSessions((prev) => prev.map((session) =>
+            session.id === activeSessionId
+                ? {
+                    ...session,
+                    updatedAt: new Date().toISOString(),
+                    messages: [
+                        {
+                            id: `latest-${Date.now()}`,
+                            senderId: currentUserId,
+                            content: cachedText,
+                            createdAt: new Date().toISOString(),
+                        },
+                    ],
+                }
+                : session,
+        ));
         setIsSending(false);
     };
 
@@ -231,6 +284,10 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                                 </button>
                             ))
                         )}
+
+                        {sessionsMeta && (
+                            <QueryPagination currentPage={sessionsMeta.page} totalPages={sessionsMeta.totalPages} totalItems={sessionsMeta.total} className="px-0" />
+                        )}
                     </CardContent>
                 </Card>
 
@@ -306,6 +363,16 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
 
                             <div ref={messagesEndRef} />
                         </div>
+
+                        {activeSessionId && messagesMeta && (
+                            <QueryPagination
+                                currentPage={messagesMeta.page}
+                                totalPages={messagesMeta.totalPages}
+                                totalItems={messagesMeta.total}
+                                paramName="messagePage"
+                                className="border-t px-4"
+                            />
+                        )}
 
                         {isAdminMode && activeSessionStatus === "OPEN" && (
                             <form onSubmit={handleSendMessage} className="border-t p-4">

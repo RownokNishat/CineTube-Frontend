@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import QueryPagination from "@/components/shared/QueryPagination";
 import { getWatchlist } from "@/services/watchlist.services";
 import { Bookmark, Film } from "lucide-react";
 import Image from "next/image";
@@ -9,11 +10,25 @@ import RemoveFromWatchlistButton from "./RemoveFromWatchlistButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function WatchlistPage() {
+interface WatchlistPageProps {
+    searchParams: Promise<{
+        page?: string;
+        limit?: string;
+    }>;
+}
+
+export default async function WatchlistPage({ searchParams }: WatchlistPageProps) {
+    const params = await searchParams;
+    const page = Math.max(1, Number(params.page ?? 1));
+    const limit = Math.max(1, Number(params.limit ?? 12));
     let watchlist: Awaited<ReturnType<typeof getWatchlist>>["data"] = [];
+    let total = 0;
+    let totalPages = 1;
     try {
-        const res = await getWatchlist();
+        const res = await getWatchlist({ page, limit });
         watchlist = res.data ?? [];
+        total = res.meta?.total ?? watchlist.length;
+        totalPages = res.meta?.totalPages ?? 1;
     } catch { /* empty */ }
 
     return (
@@ -22,7 +37,7 @@ export default async function WatchlistPage() {
                 <h1 className="text-2xl font-bold flex items-center gap-2">
                     <Bookmark className="size-6" /> My Watchlist
                 </h1>
-                <p className="text-muted-foreground">{watchlist.length} item{watchlist.length !== 1 ? "s" : ""}</p>
+                <p className="text-muted-foreground">{total} item{total !== 1 ? "s" : ""}</p>
             </div>
 
             {watchlist.length > 0 ? (
@@ -41,7 +56,7 @@ export default async function WatchlistPage() {
 
                                 return (
                                     <>
-                            <div className="relative aspect-[2/3] overflow-hidden bg-muted">
+                            <div className="relative aspect-2/3 overflow-hidden bg-muted">
                                 {item.media?.posterUrl ? (
                                     <Image src={item.media.posterUrl} alt={item.media.title} fill className="object-cover group-hover:scale-105 transition-transform" sizes="300px" />
                                 ) : (
@@ -77,6 +92,8 @@ export default async function WatchlistPage() {
                     <Button asChild><Link href="/media">Browse Media</Link></Button>
                 </div>
             )}
+
+            <QueryPagination currentPage={page} totalPages={totalPages} totalItems={total} className="px-0" />
         </div>
     );
 }

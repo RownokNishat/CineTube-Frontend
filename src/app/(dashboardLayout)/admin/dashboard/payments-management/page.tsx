@@ -1,10 +1,12 @@
 import AutoFilterForm from "@/components/shared/AutoFilterForm";
+import PaymentAnalyticsCharts from "@/components/modules/Admin/PaymentAnalyticsCharts";
 import StatsCard from "@/components/shared/StatsCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import QueryPagination from "@/components/shared/QueryPagination";
 import { getPaymentDashboardData, getPaymentTransactions } from "@/services/dashboard.services";
 import { format } from "date-fns";
 import { AlertCircle, CreditCard } from "lucide-react";
@@ -20,17 +22,19 @@ const formatCurrency = (value: number) =>
   }).format(value);
 
 interface PaymentsManagementPageProps {
-  searchParams: Promise<{ searchTerm?: string; type?: string; status?: string }>;
+  searchParams: Promise<{ searchTerm?: string; type?: string; status?: string; page?: string; limit?: string }>;
 }
 
 const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPageProps) => {
   const params = await searchParams;
+  const page = Math.max(1, Number(params.page ?? 1));
+  const limit = Math.max(1, Number(params.limit ?? 20));
 
   const [analyticsResponse, transactionsResponse] = await Promise.all([
     getPaymentDashboardData(30),
     getPaymentTransactions({
-      page: 1,
-      limit: 100,
+      page,
+      limit,
       searchTerm: params.searchTerm,
       type: (params.type as "PURCHASE" | "SUBSCRIPTION" | undefined) || undefined,
       status: params.status,
@@ -63,8 +67,14 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
     status: item.status,
     count: Number(item.count || 0),
   }));
+  const paymentTypeChartData = [
+    { name: "Purchase", value: purchaseRevenue },
+    { name: "Subscription", value: subscriptionRevenue },
+    { name: "Rental", value: rentalRevenue },
+  ].filter((item) => item.value > 0);
 
   const transactions = transactionsResponse.success ? transactionsResponse.data : [];
+  const transactionMeta = transactionsResponse.meta;
 
   return (
     <div className="space-y-6">
@@ -178,29 +188,8 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {hasAnalytics && trend.length > 0 ? (
-              <div className="space-y-2">
-                {trend.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between rounded border p-2 text-sm">
-                    <span className="text-muted-foreground">{item.label}</span>
-                    <div className="text-right">
-                      <p className="font-medium">{item.count} payments</p>
-                      <p className="text-xs text-muted-foreground">{formatCurrency(item.revenue)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No monthly payment analytics available from the backend.</p>
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <PaymentAnalyticsCharts trend={hasAnalytics ? trend : []} paymentTypeChartData={paymentTypeChartData} />
 
         <Card>
           <CardHeader>
@@ -238,6 +227,7 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
             )}
           </CardContent>
         </Card>
+
       </div>
 
       <Card>
@@ -282,6 +272,11 @@ const PaymentsManagementPage = async ({ searchParams }: PaymentsManagementPagePr
       </Card>
 
       <Card>
+        <QueryPagination
+          currentPage={transactionMeta?.page ?? page}
+          totalPages={transactionMeta?.totalPages ?? 1}
+          totalItems={transactionMeta?.total}
+        />
         <CardHeader>
           <CardTitle>Subscriptions</CardTitle>
         </CardHeader>

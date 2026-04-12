@@ -6,6 +6,7 @@ import {
     unpublishCommentAction,
 } from "./_action";
 import { type Comment } from "@/types/review.types";
+import { PaginationMeta } from "@/types/api.types";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,8 @@ export default async function CommentsManagementPage({ searchParams }: CommentsM
 
     let allComments: Comment[] = [];
     let total = 0;
+    let totalPages = 0;
+    let meta: PaginationMeta | undefined;
 
     try {
         const res = await getAdminComments({
@@ -37,6 +40,8 @@ export default async function CommentsManagementPage({ searchParams }: CommentsM
 
         allComments = res.data ?? [];
         total = res.meta?.total ?? 0;
+        totalPages = res.meta?.totalPages ?? 0;
+        meta = res.meta;
     } catch (error) {
         console.error("Failed to fetch comments:", error);
     }
@@ -63,6 +68,7 @@ export default async function CommentsManagementPage({ searchParams }: CommentsM
         <CommentsManagementContent
             comments={allComments}
             total={total}
+            totalPages={totalPages || meta?.totalPages || 0}
             page={page}
             selectedStatus={status}
             searchTerm={searchTerm}

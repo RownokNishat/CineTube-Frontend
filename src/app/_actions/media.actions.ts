@@ -85,9 +85,9 @@ export const verifyMediaPurchaseAction = async (
     }
 }
 
-export const getPurchasedMediaAction = async (): Promise<ApiResponse<Media[]> | ApiErrorResponse> => {
+export const getPurchasedMediaAction = async (params?: { page?: number; limit?: number }): Promise<ApiResponse<Media[]> | ApiErrorResponse> => {
     try {
-        return await getPurchasedMedia()
+        return await getPurchasedMedia(params)
     } catch (error: unknown) {
         const statusCode =
             error &&

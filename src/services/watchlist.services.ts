@@ -2,8 +2,8 @@ import { httpClient } from "@/lib/axios/httpClient";
 import { ApiResponse } from "@/types/api.types";
 import { WatchlistItem } from "@/types/subscription.types";
 
-export async function getWatchlist(): Promise<ApiResponse<WatchlistItem[]>> {
-    return httpClient.get<WatchlistItem[]>("/watchlist");
+export async function getWatchlist(params?: { page?: number; limit?: number }): Promise<ApiResponse<WatchlistItem[]>> {
+    return httpClient.get<WatchlistItem[]>("/watchlist", { params: params as Record<string, unknown> | undefined });
 }
 
 export async function addToWatchlist(mediaId: string): Promise<ApiResponse<WatchlistItem>> {

@@ -107,10 +107,27 @@ export default function ChatWidget() {
         if (res.success) {
             await loadMessages(activeSessionId);
             if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
-                const refreshedSessions = await getAdminSessions();
-                if (refreshedSessions.success) {
-                    setSessions(refreshedSessions.data);
-                }
+                setSessions((prev) => prev.map((session) =>
+                    session.id === activeSessionId
+                        ? {
+                            ...session,
+                            updatedAt: new Date().toISOString(),
+                            messages: [
+                                {
+                                    id: `optimistic-${Date.now()}`,
+                                    senderId: userId,
+                                    content: textCache,
+                                    imageUrl: imageStr,
+                                    createdAt: new Date().toISOString(),
+                                    sender: {
+                                        id: userId,
+                                    },
+                                },
+                                ...(session.messages ?? []),
+                            ],
+                        }
+                        : session,
+                ));
             }
         } else {
             // Restore if failed
@@ -182,7 +199,7 @@ export default function ChatWidget() {
                             </div>
                         </div>
                         <div className="flex items-center gap-1">
-                            {viewState === "CHAT" && activeSessionStatus === "OPEN" && (
+                            {viewState === "CHAT" && activeSessionStatus === "OPEN" && (userRole === "ADMIN" || userRole === "SUPER_ADMIN") && (
                                 <Button title="Resolve Chat" variant="ghost" size="icon" className="size-8 text-green-600 hover:bg-green-100" onClick={resolveSession}>
                                     <CheckCircle2 className="size-4" />
                                 </Button>
