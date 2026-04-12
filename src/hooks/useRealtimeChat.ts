@@ -5,16 +5,16 @@ import { supabase } from '@/lib/supabase/client';
 
 export interface RealtimeChatMessage {
     id: string;
-    chatSessionId: string;
+    chatSessionId?: string;
     senderId: string;
-    content: string | null;
-    imageUrl: string | null;
+    content?: string | null;
+    imageUrl?: string | null;
     createdAt: string;
     sender?: {
         id: string;
         name: string;
-        role: string;
-        image: string | null;
+        role?: string;
+        image?: string | null;
     };
 }
 
