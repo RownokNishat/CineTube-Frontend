@@ -57,6 +57,13 @@ export const adminNavItems: NavSection[] = [
             { title: "Subscriptions", href: "/admin/dashboard/subscriptions-management", icon: "CreditCard" },
         ],
     },
+    {
+        title: "Engagement",
+        items: [
+            { title: "Contact Messages", href: "/admin/dashboard/contact-messages", icon: "MessageSquare" },
+            { title: "Newsletter", href: "/admin/dashboard/newsletter-subscribers", icon: "Mail" },
+        ],
+    },
 ];
 
 export const getNavItemsByRole = (role: UserRole): NavSection[] => {

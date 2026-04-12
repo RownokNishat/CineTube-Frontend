@@ -32,6 +32,9 @@ const forwardRequest = async (
     requestHeaders.delete("host");
     requestHeaders.delete("connection");
     requestHeaders.delete("content-length");
+    // Remove accept-encoding so the backend returns uncompressed body.
+    // Node's fetch auto-decompresses, which would cause double-decompression in the browser.
+    requestHeaders.delete("accept-encoding");
 
     const init: RequestInit = {
         method: request.method,
@@ -46,6 +49,10 @@ const forwardRequest = async (
 
     const backendResponse = await fetch(targetUrl, init);
     const responseHeaders = new Headers(backendResponse.headers);
+    // Strip encoding headers: Node fetch already decompresses the body,
+    // so forwarding Content-Encoding would cause the browser to decompress again.
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("transfer-encoding");
 
     return new NextResponse(backendResponse.body, {
         status: backendResponse.status,

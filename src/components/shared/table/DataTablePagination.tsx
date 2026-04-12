@@ -136,7 +136,7 @@ const DataTablePagination = <TData,>({
   }
 
   return (
-    <div className="flex flex-col gap-3 border-t bg-muted/20 px-4 py-3 md:flex-row md:items-center md:justify-between">
+    <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t bg-card px-4 py-3 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="outline"
@@ -153,6 +153,7 @@ const DataTablePagination = <TData,>({
           size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage() || isLoading}
+          className="gap-1 whitespace-nowrap"
         >
           <ChevronLeft className="h-4 w-4" />
           Prev
@@ -209,6 +210,7 @@ const DataTablePagination = <TData,>({
           size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage() || isLoading}
+          className="gap-1 whitespace-nowrap"
         >
           Next
           <ChevronRight className="h-4 w-4" />

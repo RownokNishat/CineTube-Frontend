@@ -63,7 +63,7 @@ const QueryPagination = ({ currentPage, totalPages, totalItems, className, param
                 </Button>
 
                 <Button variant="outline" size="sm" disabled={currentPage <= 1} asChild={currentPage > 1}>
-                    {currentPage > 1 ? <Link href={buildHref(currentPage - 1)}><ChevronLeft className="size-4" /> Prev</Link> : <span><ChevronLeft className="size-4" /> Prev</span>}
+                    {currentPage > 1 ? <Link href={buildHref(currentPage - 1)} className="flex items-center gap-1 whitespace-nowrap"><ChevronLeft className="size-4" /> Prev</Link> : <span className="flex items-center gap-1 whitespace-nowrap"><ChevronLeft className="size-4" /> Prev</span>}
                 </Button>
 
                 {paginationItems.map((item) => {
@@ -98,7 +98,7 @@ const QueryPagination = ({ currentPage, totalPages, totalItems, className, param
                 })}
 
                 <Button variant="outline" size="sm" disabled={currentPage >= totalPages} asChild={currentPage < totalPages}>
-                    {currentPage < totalPages ? <Link href={buildHref(currentPage + 1)}>Next <ChevronRight className="size-4" /></Link> : <span>Next <ChevronRight className="size-4" /></span>}
+                    {currentPage < totalPages ? <Link href={buildHref(currentPage + 1)} className="flex items-center gap-1 whitespace-nowrap">Next <ChevronRight className="size-4" /></Link> : <span className="flex items-center gap-1 whitespace-nowrap">Next <ChevronRight className="size-4" /></span>}
                 </Button>
 
                 <Button variant="outline" size="sm" disabled={currentPage >= totalPages} asChild={currentPage < totalPages} className="hidden sm:inline-flex">
