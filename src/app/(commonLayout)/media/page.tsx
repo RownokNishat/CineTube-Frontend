@@ -1,11 +1,10 @@
 import MediaCard from "@/components/modules/Media/MediaCard";
 import MediaFilters from "@/components/modules/Media/MediaFilters";
-import { Button } from "@/components/ui/button";
+import QueryPagination from "@/components/shared/QueryPagination";
 import { getGenres } from "@/services/genre.services";
 import { getMediaList } from "@/services/media.services";
 import { Genre } from "@/types/media.types";
-import { ChevronLeft, ChevronRight, Film } from "lucide-react";
-import Link from "next/link";
+import { Film } from "lucide-react";
 
 interface MediaPageProps {
     searchParams: Promise<{
@@ -57,24 +56,6 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
     const meta = mediaRes.meta;
     const totalPages = meta ? Math.ceil(meta.total / limit) : 1;
 
-    const buildPageUrl = (p: number) => {
-        const sp = new URLSearchParams();
-        if (params.searchTerm) sp.set("searchTerm", params.searchTerm);
-        if (params.mediaType) sp.set("mediaType", params.mediaType);
-        if (params.pricingType) sp.set("pricingType", params.pricingType);
-        if (params.genre) sp.set("genre", params.genre);
-        if (params.streamingPlatform) sp.set("streamingPlatform", params.streamingPlatform);
-        if (params.releaseYear) sp.set("releaseYear", params.releaseYear);
-        if (params.minRating) sp.set("minRating", params.minRating);
-        if (params.popularity) sp.set("popularity", params.popularity);
-        if (params.featured) sp.set("featured", params.featured);
-        if (params.editorPick) sp.set("editorPick", params.editorPick);
-        if (params.sortBy) sp.set("sortBy", params.sortBy);
-        if (params.sortOrder) sp.set("sortOrder", params.sortOrder);
-        sp.set("page", String(p));
-        return `/media?${sp.toString()}`;
-    };
-
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="mb-8">
@@ -97,23 +78,7 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
                     </div>
 
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2">
-                            <Button variant="outline" size="sm" disabled={page <= 1} asChild={page > 1}>
-                                {page > 1 ? (
-                                    <Link href={buildPageUrl(page - 1)}><ChevronLeft className="size-4" /> Prev</Link>
-                                ) : (
-                                    <span><ChevronLeft className="size-4" /> Prev</span>
-                                )}
-                            </Button>
-                            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-                            <Button variant="outline" size="sm" disabled={page >= totalPages} asChild={page < totalPages}>
-                                {page < totalPages ? (
-                                    <Link href={buildPageUrl(page + 1)}>Next <ChevronRight className="size-4" /></Link>
-                                ) : (
-                                    <span>Next <ChevronRight className="size-4" /></span>
-                                )}
-                            </Button>
-                        </div>
+                        <QueryPagination currentPage={page} totalPages={totalPages} totalItems={meta?.total} className="max-w-2xl mx-auto" />
                     )}
                 </>
             ) : (

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
@@ -55,10 +56,14 @@ const QueryPagination = ({ currentPage, totalPages, totalItems, className, param
     const jumpForwardTarget = Math.min(totalPages, currentPage + 5);
 
     return (
-        <div className={cn("flex flex-col gap-3 border-t px-4 py-3 md:flex-row md:items-center md:justify-between", className)}>
+        <div className={cn("flex flex-col gap-3 rounded-xl border bg-muted/20 px-4 py-3 md:flex-row md:items-center md:justify-between", className)}>
             <div className="flex flex-wrap items-center gap-2">
+                <Button variant="outline" size="sm" disabled={currentPage <= 1} asChild={currentPage > 1} className="hidden sm:inline-flex">
+                    {currentPage > 1 ? <Link href={buildHref(1)}><ChevronsLeft className="size-4" /></Link> : <span><ChevronsLeft className="size-4" /></span>}
+                </Button>
+
                 <Button variant="outline" size="sm" disabled={currentPage <= 1} asChild={currentPage > 1}>
-                    {currentPage > 1 ? <Link href={buildHref(currentPage - 1)}>Prev</Link> : <span>Prev</span>}
+                    {currentPage > 1 ? <Link href={buildHref(currentPage - 1)}><ChevronLeft className="size-4" /> Prev</Link> : <span><ChevronLeft className="size-4" /> Prev</span>}
                 </Button>
 
                 {paginationItems.map((item) => {
@@ -93,11 +98,15 @@ const QueryPagination = ({ currentPage, totalPages, totalItems, className, param
                 })}
 
                 <Button variant="outline" size="sm" disabled={currentPage >= totalPages} asChild={currentPage < totalPages}>
-                    {currentPage < totalPages ? <Link href={buildHref(currentPage + 1)}>Next</Link> : <span>Next</span>}
+                    {currentPage < totalPages ? <Link href={buildHref(currentPage + 1)}>Next <ChevronRight className="size-4" /></Link> : <span>Next <ChevronRight className="size-4" /></span>}
+                </Button>
+
+                <Button variant="outline" size="sm" disabled={currentPage >= totalPages} asChild={currentPage < totalPages} className="hidden sm:inline-flex">
+                    {currentPage < totalPages ? <Link href={buildHref(totalPages)}><ChevronsRight className="size-4" /></Link> : <span><ChevronsRight className="size-4" /></span>}
                 </Button>
             </div>
 
-            <div className="text-sm text-muted-foreground">
+            <div className="rounded bg-background px-2 py-1 text-sm text-muted-foreground">
                 Page {currentPage} of {totalPages}{typeof totalItems === "number" ? `, Total ${totalItems} items` : ""}
             </div>
         </div>

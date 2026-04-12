@@ -64,7 +64,8 @@ const axiosInstance = async () => {
     // Browser environment: cookies are sent automatically by the browser
     if (typeof window !== 'undefined') {
         return axios.create({
-            baseURL: API_BASE_URL,
+            // Use same-origin proxy so HttpOnly cookies set by Next are forwarded to backend.
+            baseURL: '/api/v1',
             timeout: 30000,
             headers: { 'Content-Type': 'application/json' },
             withCredentials: true,

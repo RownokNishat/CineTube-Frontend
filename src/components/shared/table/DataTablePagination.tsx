@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Table as TanstackTable } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type PaginationToken = number | "start-ellipsis" | "end-ellipsis";
 
-const DEFAULT_PAGE_SIZES = [1, 10, 20, 50, 100] as const;
+const DEFAULT_PAGE_SIZES = [10, 20, 50, 100] as const;
 
 const isDefaultPageSize = (value: number) => {
   return DEFAULT_PAGE_SIZES.includes(value as (typeof DEFAULT_PAGE_SIZES)[number]);
@@ -136,8 +136,18 @@ const DataTablePagination = <TData,>({
   }
 
   return (
-    <div className="flex flex-col gap-3 border-t px-4 py-3 md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-3 border-t bg-muted/20 px-4 py-3 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage() || isLoading}
+          className="hidden sm:inline-flex"
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+
         <Button
           variant="outline"
           size="sm"
@@ -203,6 +213,16 @@ const DataTablePagination = <TData,>({
           Next
           <ChevronRight className="h-4 w-4" />
         </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.setPageIndex(computedTotalPages - 1)}
+          disabled={!table.getCanNextPage() || isLoading}
+          className="hidden sm:inline-flex"
+        >
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -248,7 +268,7 @@ const DataTablePagination = <TData,>({
           </div>
         )}
 
-        <span className="ml-2">
+        <span className="ml-2 rounded bg-background px-2 py-1">
           Total {totalRows ?? 0} items, {computedTotalPages} pages
         </span>
       </div>

@@ -162,7 +162,7 @@ const DataTable = <TData,>({ data = [] as TData[], columns, actions, toolbarActi
         )}
 
         {(search || filters || toolbarAction) && (
-          <div className="mb-4 flex flex-wrap items-start gap-3">
+          <div className="sticky top-14 z-20 mb-4 flex flex-wrap items-start gap-3 rounded-md border bg-background/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
             {search && (
               <DataTableSearch
                 key={search.initialValue ?? ""}

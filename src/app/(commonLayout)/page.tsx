@@ -1,4 +1,5 @@
 import MediaCard from "@/components/modules/Media/MediaCard";
+import HomeMediaSection from "@/components/modules/Home/HomeMediaSection";
 import PricingSection from "@/components/modules/Home/PricingSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,6 @@ import { getMediaList } from "@/services/media.services";
 import { Media } from "@/types/media.types";
 import { ArrowRight, Clapperboard, Compass, Film, Search, Sparkles, Star, Tv } from "lucide-react";
 import Link from "next/link";
-import { ReactNode } from "react";
 import FAQSection from "@/components/modules/Home/FAQSection";
 import NewsletterSection from "@/components/modules/Home/NewsletterSection";
 import TestimonialSection from "@/components/modules/Home/TestimonialSection";
@@ -21,55 +21,22 @@ async function fetchMedia(params: object): Promise<Media[]> {
     }
 }
 
-function HomeSection({
-    title,
-    href,
-    icon,
-    items,
-}: {
-    title: string;
-    href: string;
-    icon: ReactNode;
-    items: Media[];
-}) {
-    if (items.length === 0) return null;
-
-    return (
-        <section className="py-12 px-4 max-w-7xl mx-auto">
-            <div className="mb-6 flex items-center justify-between gap-4">
-                <h2 className="flex items-center gap-2 text-2xl font-bold">
-                    {icon}
-                    {title}
-                </h2>
-                <Button variant="ghost" size="sm" asChild>
-                    <Link href={href}>View all <ArrowRight className="ml-1 size-4" /></Link>
-                </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
-                {items.slice(0, 4).map((media) => (
-                    <MediaCard key={media.id} media={media} />
-                ))}
-            </div>
-        </section>
-    );
-}
-
 export default async function Home() {
     const [topRated, newlyAdded, movies, series, featuredCandidates, editorPickCandidates, genresRes] = await Promise.all([
-        fetchMedia({ sortBy: "averageRating", sortOrder: "desc", limit: 4 }),
-        fetchMedia({ sortBy: "createdAt", sortOrder: "desc", limit: 4 }),
-        fetchMedia({ mediaType: "MOVIE", limit: 4 }),
-        fetchMedia({ mediaType: "SERIES", limit: 4 }),
-        fetchMedia({ featured: true, sortBy: "averageRating", sortOrder: "desc", limit: 5 }),
-        fetchMedia({ editorPick: true, sortBy: "averageRating", sortOrder: "desc", limit: 4 }),
+        fetchMedia({ sortBy: "averageRating", sortOrder: "desc", limit: 10 }),
+        fetchMedia({ sortBy: "createdAt", sortOrder: "desc", limit: 10 }),
+        fetchMedia({ mediaType: "MOVIE", sortBy: "createdAt", sortOrder: "desc", limit: 10 }),
+        fetchMedia({ mediaType: "SERIES", sortBy: "createdAt", sortOrder: "desc", limit: 10 }),
+        fetchMedia({ featured: true, sortBy: "averageRating", sortOrder: "desc", limit: 10 }),
+        fetchMedia({ editorPick: true, sortBy: "averageRating", sortOrder: "desc", limit: 10 }),
         getGenres().catch(() => ({ data: [] })),
     ]);
 
     const genres = genresRes.data ?? [];
     const featured = featuredCandidates.length > 0 ? featuredCandidates[0] : topRated[0] ?? newlyAdded[0] ?? null;
     const editorPicks = editorPickCandidates.length > 0
-        ? editorPickCandidates.slice(0, 4)
-        : [...topRated.filter((item) => item.pricingType === "PREMIUM"), ...newlyAdded].slice(0, 4);
+        ? editorPickCandidates.filter((item) => item.id !== featured?.id)
+        : [...topRated.filter((item) => item.pricingType === "PREMIUM"), ...newlyAdded].filter((item) => item.id !== featured?.id).slice(0, 10);
 
     return (
         <div className="min-h-screen">
@@ -199,21 +166,21 @@ export default async function Home() {
                 </section>
             )}
 
-            <HomeSection
+            <HomeMediaSection
                 title="Top Rated This Week"
                 href="/media?sortBy=averageRating&sortOrder=desc"
                 icon={<Star className="size-5 fill-yellow-400 text-yellow-400" />}
                 items={topRated}
             />
 
-            <HomeSection
+            <HomeMediaSection
                 title="Newly Added"
                 href="/media?sortBy=createdAt&sortOrder=desc"
                 icon={<Clapperboard className="size-5 text-primary" />}
                 items={newlyAdded}
             />
 
-            <HomeSection
+            <HomeMediaSection
                 title="Editor's Picks"
                 href="/media?editorPick=true"
                 icon={<Sparkles className="size-5 text-primary" />}
@@ -221,40 +188,19 @@ export default async function Home() {
             />
 
             {/* Movies & Series split */}
-            <section className="py-12 px-4 max-w-7xl mx-auto space-y-12">
-                <div className="grid grid-cols-1 gap-12">
-                    {movies.length > 0 && (
-                        <div>
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold flex items-center gap-2">
-                                    <Film className="size-5" /> Movies
-                                </h2>
-                                <Button variant="ghost" size="sm" asChild>
-                                    <Link href="/media?mediaType=MOVIE">View all</Link>
-                                </Button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                                {movies.slice(0, 4).map((media) => <MediaCard key={media.id} media={media} />)}
-                            </div>
-                        </div>
-                    )}
-                    {series.length > 0 && (
-                        <div>
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold flex items-center gap-2">
-                                    <Tv className="size-5" /> Series
-                                </h2>
-                                <Button variant="ghost" size="sm" asChild>
-                                    <Link href="/media?mediaType=SERIES">View all</Link>
-                                </Button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                                {series.slice(0, 4).map((media) => <MediaCard key={media.id} media={media} />)}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </section>
+            <HomeMediaSection
+                title="Movies"
+                href="/media?mediaType=MOVIE"
+                icon={<Film className="size-5" />}
+                items={movies}
+            />
+
+            <HomeMediaSection
+                title="Series"
+                href="/media?mediaType=SERIES"
+                icon={<Tv className="size-5" />}
+                items={series}
+            />
 
             <TestimonialSection />
             <PricingSection />
