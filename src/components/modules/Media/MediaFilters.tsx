@@ -64,7 +64,7 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
 
                 <div className="flex flex-wrap gap-2 items-center">
                     <Select value={searchParams.get("mediaType") ?? "all"} onValueChange={(v) => updateParam("mediaType", v)}>
-                        <SelectTrigger className="h-9 w-28 text-sm">
+                        <SelectTrigger className="hidden sm:flex h-9 w-28 text-sm">
                             <SelectValue placeholder="Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -75,7 +75,7 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
                     </Select>
 
                     <Select value={searchParams.get("pricingType") ?? "all"} onValueChange={(v) => updateParam("pricingType", v)}>
-                        <SelectTrigger className="h-9 w-28 text-sm">
+                        <SelectTrigger className="hidden sm:flex h-9 w-28 text-sm">
                             <SelectValue placeholder="Pricing" />
                         </SelectTrigger>
                         <SelectContent>
@@ -86,7 +86,7 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
                     </Select>
 
                     <Select value={searchParams.get("genre") ?? "all"} onValueChange={(v) => updateParam("genre", v)}>
-                        <SelectTrigger className="h-9 w-32 text-sm">
+                        <SelectTrigger className="hidden sm:flex h-9 w-32 text-sm">
                             <SelectValue placeholder="Genre" />
                         </SelectTrigger>
                         <SelectContent>
@@ -122,6 +122,42 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
             {/* Advanced Filters */}
             {showAdvanced && (
                 <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-muted/30">
+                    <div className="flex w-full flex-wrap gap-2 sm:hidden">
+                        <Select value={searchParams.get("mediaType") ?? "all"} onValueChange={(v) => updateParam("mediaType", v)}>
+                            <SelectTrigger className="h-9 w-[calc(50%-0.25rem)] min-w-28 text-sm">
+                                <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem value="MOVIE">Movies</SelectItem>
+                                <SelectItem value="SERIES">Series</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={searchParams.get("pricingType") ?? "all"} onValueChange={(v) => updateParam("pricingType", v)}>
+                            <SelectTrigger className="h-9 w-[calc(50%-0.25rem)] min-w-28 text-sm">
+                                <SelectValue placeholder="Pricing" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All</SelectItem>
+                                <SelectItem value="FREE">Free</SelectItem>
+                                <SelectItem value="PREMIUM">Premium</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={searchParams.get("genre") ?? "all"} onValueChange={(v) => updateParam("genre", v)}>
+                            <SelectTrigger className="h-9 w-full text-sm">
+                                <SelectValue placeholder="Genre" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Genres</SelectItem>
+                                {genres.map((g) => (
+                                    <SelectItem key={g.id} value={g.name}>{g.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     <Select value={searchParams.get("streamingPlatform") ?? "all"} onValueChange={(v) => updateParam("streamingPlatform", v)}>
                         <SelectTrigger className="h-9 w-40 text-sm">
                             <SelectValue placeholder="Streaming Platform" />
