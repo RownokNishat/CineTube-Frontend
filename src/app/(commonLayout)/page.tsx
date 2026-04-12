@@ -42,8 +42,10 @@ export default async function Home() {
     return (
         <div className="min-h-screen">
             {/* Hero Section */}
-            <section className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 md:py-24 px-3 sm:px-4">
-                <div className="max-w-4xl mx-auto text-center">
+            <section className="relative ct-hero-grid bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 md:py-24 px-3 sm:px-4 overflow-hidden">
+                <div className="ct-blob ct-blob--one" />
+                <div className="ct-blob ct-blob--two" />
+                <div className="max-w-4xl mx-auto text-center ct-fade-slide relative z-10">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 tracking-tight">
                         Discover & Rate <br />
                         <span className="text-primary">Movies & Series</span>
@@ -77,7 +79,7 @@ export default async function Home() {
             </section>
 
             <section className="-mt-8 sm:-mt-10 px-2 sm:px-4 relative z-10">
-                <div className="mx-auto max-w-6xl rounded-xl sm:rounded-2xl md:rounded-3xl border bg-background/95 p-3 sm:p-4 md:p-6 shadow-xl md:shadow-2xl backdrop-blur">
+                <div className="mx-auto max-w-6xl rounded-xl sm:rounded-2xl md:rounded-3xl border bg-background/95 p-3 sm:p-4 md:p-6 shadow-xl md:shadow-2xl backdrop-blur ct-fade-slide">
                     <div className="mb-3 sm:mb-4 flex items-center gap-2">
                         <Compass className="size-4 sm:size-5 text-primary" />
                         <h2 className="text-base sm:text-lg md:text-xl font-semibold">Find your next watch</h2>
@@ -133,8 +135,10 @@ export default async function Home() {
             </section>
 
             {featured && (
-                <section className="px-3 sm:px-4 py-8 sm:py-12">
-                    <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl sm:rounded-3xl border bg-muted/30">
+                <section className="px-3 sm:px-4 py-8 sm:py-12 ct-fade-slide">
+                    <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl sm:rounded-3xl border bg-muted/30 relative">
+                        <div className="absolute -left-14 top-1/3 h-44 w-44 rounded-full bg-primary/15 blur-3xl animate-[ctDrift_8s_ease-in-out_infinite]" />
+                        <div className="absolute right-6 top-6 h-24 w-24 rounded-full bg-yellow-400/15 blur-2xl animate-[ctPulseSoft_5s_ease-in-out_infinite]" />
 
                         {/* Mobile/tablet: poster banner */}
                         {featured.posterUrl && (
@@ -156,7 +160,7 @@ export default async function Home() {
                             </div>
                         )}
 
-                        <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[1.3fr_0.9fr] lg:p-8">
+                        <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[1.3fr_0.9fr] lg:p-8 relative z-10">
                             {/* Text content */}
                             <div className="space-y-4">
                                 {/* Only show badge on desktop — already shown in poster on mobile */}
@@ -199,6 +203,7 @@ export default async function Home() {
                 href="/media?sortBy=averageRating&sortOrder=desc"
                 icon={<Star className="size-5 fill-yellow-400 text-yellow-400" />}
                 items={topRated}
+                theme="stars"
             />
 
             <HomeMediaSection
@@ -206,6 +211,7 @@ export default async function Home() {
                 href="/media?sortBy=createdAt&sortOrder=desc"
                 icon={<Clapperboard className="size-5 text-primary" />}
                 items={newlyAdded}
+                theme="reel"
             />
 
             <HomeMediaSection
@@ -213,6 +219,7 @@ export default async function Home() {
                 href="/media?editorPick=true"
                 icon={<Sparkles className="size-5 text-primary" />}
                 items={editorPicks}
+                theme="neon"
             />
 
             {/* Movies & Series split */}
@@ -221,6 +228,7 @@ export default async function Home() {
                 href="/media?mediaType=MOVIE"
                 icon={<Film className="size-5" />}
                 items={movies}
+                theme="vintage"
             />
 
             <HomeMediaSection
@@ -228,6 +236,7 @@ export default async function Home() {
                 href="/media?mediaType=SERIES"
                 icon={<Tv className="size-5" />}
                 items={series}
+                theme="night"
             />
 
             <TestimonialSection />
