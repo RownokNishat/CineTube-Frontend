@@ -1,77 +1,75 @@
-"use server";
+import { httpClient } from "@/lib/axios/httpClient";
+import { ApiResponse } from "@/types/api.types";
+import axios from "axios";
 
-import { cookies } from "next/headers";
-import { isDynamicServerUsageError } from "@/lib/isDynamicServerUsageError";
+interface ChatSessionPayload {
+    id: string;
+    status: "OPEN" | "RESOLVED";
+    createdAt?: string;
+    updatedAt?: string;
+}
 
-const BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+interface ChatMessagePayload {
+    id: string;
+    senderId: string;
+    content?: string | null;
+    imageUrl?: string | null;
+    createdAt: string;
+}
 
-const fetchApi = async (endpoint: string, options?: RequestInit) => {
+const toApiError = <TData>(error: unknown): ApiResponse<TData> => {
+    if (axios.isAxiosError(error)) {
+        const message = (error.response?.data as { message?: string } | undefined)?.message || error.message || "API Request Failed";
+        return { success: false, message, data: null as TData } as unknown as ApiResponse<TData>;
+    }
+
+    return { success: false, message: "Network Error", data: null as TData } as unknown as ApiResponse<TData>;
+};
+
+export const createSession = async (): Promise<ApiResponse<ChatSessionPayload>> => {
     try {
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get("accessToken")?.value;
-        const sessionToken = cookieStore.get("better-auth.session_token")?.value;
-
-        const res = await fetch(`${BASE_API_URL}${endpoint}`, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                Cookie: `accessToken=${accessToken ?? ""}; better-auth.session_token=${sessionToken ?? ""}`,
-                ...(options?.headers || {}),
-            },
-        });
-
-        if (!res.ok) {
-            return { success: false, message: "API Request Failed", data: null };
-        }
-
-        const json = await res.json();
-        return json;
+        return await httpClient.post<ChatSessionPayload>("/chat/session", {});
     } catch (error) {
-        if (isDynamicServerUsageError(error)) {
-            throw error;
-        }
-        return { success: false, message: "Network Error", data: null };
+        return toApiError<ChatSessionPayload>(error);
     }
 };
 
-export const createSession = async () => {
-    return fetchApi('/chat/session', { method: "POST" });
+export const getMySessions = async (params?: { page?: number; limit?: number }): Promise<ApiResponse<ChatSessionPayload[]>> => {
+    try {
+        return await httpClient.get<ChatSessionPayload[]>("/chat/my-sessions", { params: params as Record<string, unknown> | undefined });
+    } catch (error) {
+        return toApiError<ChatSessionPayload[]>(error);
+    }
 };
 
-export const getMySessions = async (params?: { page?: number; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.page) query.set("page", String(params.page));
-    if (params?.limit) query.set("limit", String(params.limit));
-    const endpoint = query.size > 0 ? `/chat/my-sessions?${query.toString()}` : '/chat/my-sessions';
-    return fetchApi(endpoint, { method: "GET" });
+export const getAdminSessions = async (params?: { page?: number; limit?: number }): Promise<ApiResponse<ChatSessionPayload[]>> => {
+    try {
+        return await httpClient.get<ChatSessionPayload[]>("/chat/admin-sessions", { params: params as Record<string, unknown> | undefined });
+    } catch (error) {
+        return toApiError<ChatSessionPayload[]>(error);
+    }
 };
 
-export const getAdminSessions = async (params?: { page?: number; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.page) query.set("page", String(params.page));
-    if (params?.limit) query.set("limit", String(params.limit));
-    const endpoint = query.size > 0 ? `/chat/admin-sessions?${query.toString()}` : '/chat/admin-sessions';
-    return fetchApi(endpoint, { method: "GET" });
+export const getSessionMessages = async (sessionId: string, params?: { page?: number; limit?: number }): Promise<ApiResponse<ChatMessagePayload[]>> => {
+    try {
+        return await httpClient.get<ChatMessagePayload[]>(`/chat/session/${sessionId}/messages`, { params: params as Record<string, unknown> | undefined });
+    } catch (error) {
+        return toApiError<ChatMessagePayload[]>(error);
+    }
 };
 
-export const getSessionMessages = async (sessionId: string, params?: { page?: number; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.page) query.set("page", String(params.page));
-    if (params?.limit) query.set("limit", String(params.limit));
-    const endpoint = query.size > 0 ? `/chat/session/${sessionId}/messages?${query.toString()}` : `/chat/session/${sessionId}/messages`;
-    return fetchApi(endpoint, { method: "GET" });
+export const sendMessage = async (payload: { chatSessionId: string; content?: string; imageUrl?: string }): Promise<ApiResponse<ChatMessagePayload>> => {
+    try {
+        return await httpClient.post<ChatMessagePayload>("/chat/message", payload);
+    } catch (error) {
+        return toApiError<ChatMessagePayload>(error);
+    }
 };
 
-export const sendMessage = async (payload: { chatSessionId: string, content?: string, imageUrl?: string }) => {
-    return fetchApi('/chat/message', {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
-};
-
-export const updateSessionStatus = async (sessionId: string, status: "OPEN" | "RESOLVED") => {
-    return fetchApi(`/chat/session/${sessionId}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status })
-    });
+export const updateSessionStatus = async (sessionId: string, status: "OPEN" | "RESOLVED"): Promise<ApiResponse<ChatSessionPayload>> => {
+    try {
+        return await httpClient.patch<ChatSessionPayload>(`/chat/session/${sessionId}/status`, { status });
+    } catch (error) {
+        return toApiError<ChatSessionPayload>(error);
+    }
 };
