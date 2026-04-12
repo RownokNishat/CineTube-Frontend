@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRealtimeChat } from "@/hooks/useRealtimeChat";
 import { MessageCircle, X, Send, Image as ImageIcon, CheckCircle2, Inbox, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +33,7 @@ export default function ChatWidget() {
     
     // Active chat state
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-    const [messages, setMessages] = useState<any[]>([]);
+    const { messages, setMessages } = useRealtimeChat(activeSessionId ?? '', []);
     const [inputText, setInputText] = useState("");
     const [isSending, setIsSending] = useState(false);
 

@@ -10,6 +10,7 @@
     "type-check": "npx tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.103.0",
     "@tanstack/react-devtools": "^0.9.6",
     "@tanstack/react-form": "^1.28.3",
     "@tanstack/react-form-devtools": "^0.2.16",

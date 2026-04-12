@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRealtimeChat } from "@/hooks/useRealtimeChat";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,8 +61,8 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
     const [sessionsMeta, setSessionsMeta] = useState<PaginationMeta | null>(null);
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
     const [activeSessionStatus, setActiveSessionStatus] = useState<ChatStatus | null>(null);
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [messagesMeta, setMessagesMeta] = useState<PaginationMeta | null>(null);
+    const { messages, setMessages } = useRealtimeChat(activeSessionId ?? '', []);
     const [inputText, setInputText] = useState("");
     const [sessionFilter, setSessionFilter] = useState<"ALL" | ChatStatus>(isAdminMode ? "ALL" : "RESOLVED");
     const messagesEndRef = useRef<HTMLDivElement>(null);

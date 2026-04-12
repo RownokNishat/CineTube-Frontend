@@ -1,6 +1,7 @@
 import DashboardNavbar from "@/components/modules/Dashboord/DashboardNavbar"
 import DashboardSidebar from "@/components/modules/Dashboord/DashboardSidebar"
 import ChatWidget from "@/components/modules/shared/ChatWidget"
+import AiChatWidget from "@/components/modules/shared/AiChatWidget"
 import React from "react"
 
 export const dynamic = 'force-dynamic'
@@ -19,6 +20,7 @@ const RootDashboardLayout = async ({children} : {children: React.ReactNode}) => 
             </main>
         </div>
         <ChatWidget />
+        <AiChatWidget />
     </div>
   )
 }
