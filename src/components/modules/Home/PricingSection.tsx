@@ -88,7 +88,7 @@ const PricingSection = async () => {
         .filter((plan): plan is SubscriptionPlan => Boolean(plan));
 
     return (
-        <section className="py-16 px-4">
+        <section className="py-16 px-4 ct-fade-slide">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-bold mb-3">Choose Your Plan</h2>
@@ -100,7 +100,12 @@ const PricingSection = async () => {
                         const isPopular = plan.plan === "MONTHLY";
 
                         return (
-                        <Card key={plan.plan} className={`relative ${isPopular ? "border-primary shadow-lg" : ""}`}>
+                        <Card
+                            key={plan.plan}
+                            className={`relative overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-xl ${isPopular ? "border-primary shadow-lg" : ""}`}
+                            style={{ animation: `ctFadeSlide 0.65s ease-out ${orderedPlans.indexOf(plan) * 120}ms both` }}
+                        >
+                            <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
                             {isPopular && (
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                                     <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">Most Popular</span>

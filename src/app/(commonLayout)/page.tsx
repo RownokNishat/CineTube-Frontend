@@ -43,14 +43,15 @@ export default async function Home() {
         <div className="min-h-screen">
             {/* Hero Section */}
             <section className="relative ct-hero-grid bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 md:py-24 px-3 sm:px-4 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/55" />
                 <div className="ct-blob ct-blob--one" />
                 <div className="ct-blob ct-blob--two" />
                 <div className="max-w-4xl mx-auto text-center ct-fade-slide relative z-10">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 tracking-tight">
+                    <h1 className="ct-hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 tracking-tight">
                         Discover & Rate <br />
                         <span className="text-primary">Movies & Series</span>
                     </h1>
-                    <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto">
+                    <p className="ct-hero-subtitle text-sm sm:text-base md:text-lg lg:text-xl text-gray-200 mb-6 sm:mb-8 max-w-2xl mx-auto">
                         Explore thousands of movies and TV series, share your reviews, and discover what to watch next.
                     </p>
                     <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 justify-center">
@@ -136,9 +137,10 @@ export default async function Home() {
 
             {featured && (
                 <section className="px-3 sm:px-4 py-8 sm:py-12 ct-fade-slide">
-                    <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl sm:rounded-3xl border bg-muted/30 relative">
-                        <div className="absolute -left-14 top-1/3 h-44 w-44 rounded-full bg-primary/15 blur-3xl animate-[ctDrift_8s_ease-in-out_infinite]" />
-                        <div className="absolute right-6 top-6 h-24 w-24 rounded-full bg-yellow-400/15 blur-2xl animate-[ctPulseSoft_5s_ease-in-out_infinite]" />
+                    <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl sm:rounded-3xl border relative ct-featured-mesh">
+                        <div className="absolute -left-14 top-1/3 h-44 w-44 rounded-full bg-primary/20 blur-3xl animate-[ctDrift_8s_ease-in-out_infinite]" />
+                        <div className="absolute right-6 top-6 h-24 w-24 rounded-full bg-yellow-400/25 blur-2xl animate-[ctPulseSoft_5s_ease-in-out_infinite]" />
+                        <div className="absolute bottom-0 left-1/3 h-24 w-24 rounded-full bg-cyan-400/20 blur-2xl animate-[ctFloat_7s_ease-in-out_infinite]" />
 
                         {/* Mobile/tablet: poster banner */}
                         {featured.posterUrl && (
@@ -239,10 +241,18 @@ export default async function Home() {
                 theme="night"
             />
 
-            <TestimonialSection />
-            <PricingSection />
-            <FAQSection />
-            <NewsletterSection />
+            <div className="ct-home-band ct-home-band--testimonials">
+                <TestimonialSection />
+            </div>
+            <div className="ct-home-band ct-home-band--pricing">
+                <PricingSection />
+            </div>
+            <div className="ct-home-band ct-home-band--faq">
+                <FAQSection />
+            </div>
+            <div className="ct-home-band ct-home-band--newsletter">
+                <NewsletterSection />
+            </div>
         </div>
     );
 }

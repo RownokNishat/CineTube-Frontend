@@ -19,15 +19,15 @@ export default function FAQSection() {
     ];
 
     return (
-        <section className="py-16 px-4">
+        <section className="py-16 px-4 ct-fade-slide">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-10">
                     <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
                     <p className="text-muted-foreground">Everything you need to know about CineTube.</p>
                 </div>
-                <div className="divide-y border-y">
+                <div className="divide-y border-y rounded-xl bg-background/70 backdrop-blur-sm">
                     {faqs.map((faq, i) => (
-                        <div key={i} className="py-6">
+                        <div key={i} className="py-6 px-4 transition-colors duration-300 hover:bg-muted/30">
                             <h3 className="text-lg font-medium mb-2">{faq.q}</h3>
                             <p className="text-muted-foreground">{faq.a}</p>
                         </div>

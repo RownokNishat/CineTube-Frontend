@@ -30,8 +30,9 @@ export default function NewsletterSection() {
     };
 
     return (
-        <section className="py-16 px-4">
+        <section className="py-16 px-4 ct-fade-slide">
             <div className="max-w-5xl mx-auto bg-primary text-primary-foreground rounded-3xl p-8 md:p-16 text-center relative overflow-hidden">
+                <div className="absolute inset-0 opacity-35" style={{ backgroundImage: "linear-gradient(120deg, rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
                 <div className="relative z-10">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Never Miss a Release</h2>
                     <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
@@ -52,8 +53,8 @@ export default function NewsletterSection() {
                     </form>
                 </div>
                 {/* Decorative background circles */}
-                <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-                <div className="absolute bottom-0 right-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+                <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-[ctDrift_8s_ease-in-out_infinite]"></div>
+                <div className="absolute bottom-0 right-0 w-64 h-64 bg-black/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 animate-[ctPulseSoft_6s_ease-in-out_infinite]"></div>
             </div>
         </section>
     );
