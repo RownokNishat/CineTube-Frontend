@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
 export interface RealtimeChatMessage {
@@ -18,17 +18,21 @@ export interface RealtimeChatMessage {
     };
 }
 
-export function useRealtimeChat(sessionId: string, initialMessages: RealtimeChatMessage[]) {
-    const [messages, setMessages] = useState<RealtimeChatMessage[]>(initialMessages);
+export function useRealtimeChat(sessionId: string) {
+    const [messages, setMessages] = useState<RealtimeChatMessage[]>([]);
+    // Track whether a realtime message arrived (vs. a bulk load from REST)
+    const realtimeArrived = useRef(false);
 
-    // Sync initial messages when they change (e.g. after REST fetch completes)
+    // Clear messages immediately when switching to a different session
     useEffect(() => {
-        setMessages(initialMessages);
-    }, [initialMessages]);
+        setMessages([]);
+        realtimeArrived.current = false;
+    }, [sessionId]);
 
     useEffect(() => {
         if (!sessionId) return;
 
+        // Table name is snake_case in the DB; column names remain camelCase
         const channel = supabase
             .channel(`chat:${sessionId}`)
             .on(
@@ -36,13 +40,13 @@ export function useRealtimeChat(sessionId: string, initialMessages: RealtimeChat
                 {
                     event: 'INSERT',
                     schema: 'public',
-                    table: 'ChatMessage',
+                    table: 'chat_message',           // ← snake_case table name
                     filter: `chatSessionId=eq.${sessionId}`,
                 },
                 (payload) => {
                     const newMessage = payload.new as RealtimeChatMessage;
+                    realtimeArrived.current = true;
                     setMessages((prev) => {
-                        // Avoid duplicates if REST and realtime race
                         if (prev.some((m) => m.id === newMessage.id)) return prev;
                         return [...prev, newMessage];
                     });
@@ -55,5 +59,5 @@ export function useRealtimeChat(sessionId: string, initialMessages: RealtimeChat
         };
     }, [sessionId]);
 
-    return { messages, setMessages };
+    return { messages, setMessages, realtimeArrived };
 }

@@ -62,10 +62,11 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
     const [activeSessionStatus, setActiveSessionStatus] = useState<ChatStatus | null>(null);
     const [messagesMeta, setMessagesMeta] = useState<PaginationMeta | null>(null);
-    const { messages, setMessages } = useRealtimeChat(activeSessionId ?? '', []);
+    const { messages, setMessages, realtimeArrived } = useRealtimeChat(activeSessionId ?? '');
     const [inputText, setInputText] = useState("");
     const [sessionFilter, setSessionFilter] = useState<"ALL" | ChatStatus>(isAdminMode ? "ALL" : "RESOLVED");
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const sessionPage = Math.max(1, Number(searchParams.get("page") ?? 1));
     const messagePage = Math.max(1, Number(searchParams.get("messagePage") ?? 1));
     const selectedSessionId = searchParams.get("sessionId");
@@ -89,13 +90,25 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
         return scopedSessions.filter((session) => session.status === sessionFilter);
     }, [isAdminMode, sessionFilter, sessions]);
 
-    const scrollToBottom = useCallback(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const isNearBottom = useCallback(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return true;
+        return el.scrollHeight - el.scrollTop - el.clientHeight < 150;
     }, []);
 
+    const scrollToBottom = useCallback((force = false) => {
+        if (force || isNearBottom()) {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [isNearBottom]);
+
+    // Only auto-scroll on realtime messages if the user is already near the bottom
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, scrollToBottom]);
+        if (realtimeArrived.current) {
+            scrollToBottom();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [messages]);
 
     const loadMessages = useCallback(async (sessionId: string, status: ChatStatus, page = 1) => {
         const response = await getSessionMessages(sessionId, { page, limit: 25 });
@@ -108,7 +121,9 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
         setActiveSessionStatus(status);
         setMessages((response.data ?? []) as ChatMessage[]);
         setMessagesMeta((response.meta ?? null) as PaginationMeta | null);
-    }, []);
+        // Force scroll to bottom after loading messages for a session
+        setTimeout(() => scrollToBottom(true), 50);
+    }, [scrollToBottom]);
 
     const loadSessions = useCallback(async () => {
         setIsLoading(true);
@@ -320,7 +335,7 @@ const DashboardChatPage = ({ mode, currentUserId }: DashboardChatPageProps) => {
                     </CardHeader>
 
                     <CardContent className="flex h-full flex-col p-0">
-                        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+                        <div ref={scrollContainerRef} className="flex-1 space-y-4 overflow-y-auto p-4">
                             {!activeSessionId ? (
                                 <div className="flex h-full min-h-90 items-center justify-center text-center text-muted-foreground">
                                     <div className="space-y-2">

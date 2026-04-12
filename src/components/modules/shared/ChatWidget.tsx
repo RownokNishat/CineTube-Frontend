@@ -33,19 +33,32 @@ export default function ChatWidget() {
     
     // Active chat state
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-    const { messages, setMessages } = useRealtimeChat(activeSessionId ?? '', []);
+    const { messages, setMessages, realtimeArrived } = useRealtimeChat(activeSessionId ?? '');
     const [inputText, setInputText] = useState("");
     const [isSending, setIsSending] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const isNearBottom = () => {
+        const el = scrollContainerRef.current;
+        if (!el) return true;
+        return el.scrollHeight - el.scrollTop - el.clientHeight < 150;
     };
 
+    const scrollToBottom = (force = false) => {
+        if (force || isNearBottom()) {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
+    // On realtime message: only scroll if user is already near the bottom
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, viewState]);
+        if (realtimeArrived.current) {
+            scrollToBottom();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [messages]);
 
     const initializeChat = useCallback(async () => {
         setViewState("LOADING");
@@ -88,6 +101,8 @@ export default function ChatWidget() {
         const res = await getSessionMessages(sessionId);
         if (res.success) {
             setMessages(res.data);
+            // Force scroll after initial REST load so user sees latest message
+            setTimeout(() => scrollToBottom(true), 50);
         }
     };
 
@@ -211,7 +226,7 @@ export default function ChatWidget() {
                         </div>
                     </CardHeader>
                     
-                    <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
+                    <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
                         {viewState === "LOADING" && (
                             <div className="h-full flex items-center justify-center text-muted-foreground flex-col gap-2">
                                 <RefreshCw className="size-6 animate-spin" />
