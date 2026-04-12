@@ -6,6 +6,7 @@ import QueryPagination from "@/components/shared/QueryPagination";
 import { ContactMessageRow } from "./ContactMessageRow";
 import { markContactMessageReadAction } from "./_action";
 import { Mail, MailOpen, MessageSquare } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -55,20 +56,20 @@ export default async function ContactMessagesPage({ searchParams }: ContactMessa
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <Badge variant={!isRead && isRead !== false ? "default" : "outline"} className="cursor-pointer">
-                        <a href="?isRead=">All</a>
+                    <Badge variant={!isRead && isRead !== false ? "default" : "outline"} className="cursor-pointer px-3 py-1">
+                        <Link href="?isRead=">All</Link>
                     </Badge>
-                    <Badge variant={isRead === false ? "default" : "outline"} className="cursor-pointer">
-                        <a href="?isRead=false">
-                            <Mail className="h-3 w-3 inline mr-1" />
+                    <Badge variant={isRead === false ? "default" : "outline"} className="cursor-pointer px-3 py-1">
+                        <Link href="?isRead=false" className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
                             Unread
-                        </a>
+                        </Link>
                     </Badge>
-                    <Badge variant={isRead === true ? "default" : "outline"} className="cursor-pointer">
-                        <a href="?isRead=true">
-                            <MailOpen className="h-3 w-3 inline mr-1" />
+                    <Badge variant={isRead === true ? "default" : "outline"} className="cursor-pointer px-3 py-1">
+                        <Link href="?isRead=true" className="flex items-center gap-1">
+                            <MailOpen className="h-3 w-3" />
                             Read
-                        </a>
+                        </Link>
                     </Badge>
                 </div>
             </div>

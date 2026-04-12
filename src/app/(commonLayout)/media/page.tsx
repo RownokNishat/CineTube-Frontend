@@ -58,20 +58,21 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-                    <Film className="size-7" /> Movies & Series
+            <div className="mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-1 flex items-center gap-2">
+                    <Film className="size-6 sm:size-7" /> Movies & Series
                 </h1>
-                <p className="text-muted-foreground">Discover, rate, and review your favourite titles</p>
+                <p className="text-muted-foreground text-sm">Discover, rate, and review your favourite titles</p>
             </div>
 
-            <div className="mb-6">
+            {/* Sticky filter bar — sits just under the navbar (h-14 = 56px) */}
+            <div className="sticky top-14 z-20 mb-6 rounded-xl border bg-background/95 p-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
                 <MediaFilters genres={genres} />
             </div>
 
             {mediaList.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                         {mediaList.map((media) => (
                             <MediaCard key={media.id} media={media} />
                         ))}

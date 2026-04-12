@@ -47,79 +47,83 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
 
     return (
         <div className="space-y-3">
-            <div className="flex flex-wrap gap-3 items-center">
-                <form onSubmit={handleSearch} className="flex gap-2 flex-1 min-w-[200px]">
-                    <div className="relative flex-1">
+            {/* Row 1: search + primary filters */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <form onSubmit={handleSearch} className="flex gap-2 flex-1 min-w-0">
+                    <div className="relative flex-1 min-w-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                         <Input
                             placeholder="Search title, director, cast..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="pl-9"
+                            className="pl-9 h-9 text-sm"
                         />
                     </div>
-                    <Button type="submit" size="sm">Search</Button>
+                    <Button type="submit" size="sm" className="shrink-0">Search</Button>
                 </form>
 
-                <Select value={searchParams.get("mediaType") ?? "all"} onValueChange={(v) => updateParam("mediaType", v)}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="MOVIE">Movies</SelectItem>
-                        <SelectItem value="SERIES">Series</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="flex flex-wrap gap-2 items-center">
+                    <Select value={searchParams.get("mediaType") ?? "all"} onValueChange={(v) => updateParam("mediaType", v)}>
+                        <SelectTrigger className="h-9 w-28 text-sm">
+                            <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="MOVIE">Movies</SelectItem>
+                            <SelectItem value="SERIES">Series</SelectItem>
+                        </SelectContent>
+                    </Select>
 
-                <Select value={searchParams.get("pricingType") ?? "all"} onValueChange={(v) => updateParam("pricingType", v)}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Pricing" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="FREE">Free</SelectItem>
-                        <SelectItem value="PREMIUM">Premium</SelectItem>
-                    </SelectContent>
-                </Select>
+                    <Select value={searchParams.get("pricingType") ?? "all"} onValueChange={(v) => updateParam("pricingType", v)}>
+                        <SelectTrigger className="h-9 w-28 text-sm">
+                            <SelectValue placeholder="Pricing" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All</SelectItem>
+                            <SelectItem value="FREE">Free</SelectItem>
+                            <SelectItem value="PREMIUM">Premium</SelectItem>
+                        </SelectContent>
+                    </Select>
 
-                <Select value={searchParams.get("genre") ?? "all"} onValueChange={(v) => updateParam("genre", v)}>
-                    <SelectTrigger className="w-36">
-                        <SelectValue placeholder="Genre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Genres</SelectItem>
-                        {genres.map((g) => (
-                            <SelectItem key={g.id} value={g.name}>{g.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    <Select value={searchParams.get("genre") ?? "all"} onValueChange={(v) => updateParam("genre", v)}>
+                        <SelectTrigger className="h-9 w-32 text-sm">
+                            <SelectValue placeholder="Genre" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Genres</SelectItem>
+                            {genres.map((g) => (
+                                <SelectItem key={g.id} value={g.name}>{g.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
 
-                <Button
-                    variant={showAdvanced ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                >
-                    More Filters
-                </Button>
-
-                {hasFilters && (
                     <Button
-                        variant="ghost"
+                        variant={showAdvanced ? "default" : "outline"}
                         size="sm"
-                        onClick={clearAll}
-                        className="text-destructive hover:text-destructive"
+                        className="h-9 text-sm shrink-0"
+                        onClick={() => setShowAdvanced(!showAdvanced)}
                     >
-                        <X className="size-4 mr-1" /> Clear
+                        More Filters
                     </Button>
-                )}
+
+                    {hasFilters && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={clearAll}
+                            className="h-9 text-sm text-destructive hover:text-destructive shrink-0"
+                        >
+                            <X className="size-4 mr-1" /> Clear
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Advanced Filters */}
             {showAdvanced && (
-                <div className="flex flex-wrap gap-3 p-4 border rounded-lg bg-muted/30">
+                <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-muted/30">
                     <Select value={searchParams.get("streamingPlatform") ?? "all"} onValueChange={(v) => updateParam("streamingPlatform", v)}>
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="h-9 w-40 text-sm">
                             <SelectValue placeholder="Streaming Platform" />
                         </SelectTrigger>
                         <SelectContent>
@@ -133,7 +137,7 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
                     </Select>
 
                     <Select value={searchParams.get("releaseYear") ?? "all"} onValueChange={(v) => updateParam("releaseYear", v)}>
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="h-9 w-36 text-sm">
                             <SelectValue placeholder="Release Year" />
                         </SelectTrigger>
                         <SelectContent>
@@ -147,7 +151,7 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
                     </Select>
 
                     <Select value={searchParams.get("minRating") ?? "all"} onValueChange={(v) => updateParam("minRating", v)}>
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="h-9 w-36 text-sm">
                             <SelectValue placeholder="Minimum Rating" />
                         </SelectTrigger>
                         <SelectContent>
@@ -161,7 +165,7 @@ const MediaFilters = ({ genres }: MediaFiltersProps) => {
                     </Select>
 
                     <Select value={searchParams.get("sortBy") ?? "createdAt"} onValueChange={(v) => updateParam("sortBy", v)}>
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="h-9 w-36 text-sm">
                             <SelectValue placeholder="Sort by" />
                         </SelectTrigger>
                         <SelectContent>

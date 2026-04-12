@@ -11,6 +11,7 @@ import Link from "next/link";
 import FAQSection from "@/components/modules/Home/FAQSection";
 import NewsletterSection from "@/components/modules/Home/NewsletterSection";
 import TestimonialSection from "@/components/modules/Home/TestimonialSection";
+import Image from "next/image";
 
 async function fetchMedia(params: object): Promise<Media[]> {
     try {
@@ -132,35 +133,62 @@ export default async function Home() {
             </section>
 
             {featured && (
-                <section className="px-4 py-12">
-                    <div className="mx-auto grid max-w-7xl gap-6 overflow-hidden rounded-3xl border bg-muted/30 p-6 md:grid-cols-[1.3fr_0.9fr] md:p-8">
-                        <div className="space-y-4">
-                            <Badge className="gap-2 rounded-full px-3 py-1 text-xs">
-                                <Sparkles className="size-3.5" /> Featured Spotlight
-                            </Badge>
-                            <div className="space-y-3">
-                                <h2 className="text-3xl font-bold md:text-4xl">{featured.title}</h2>
-                                <p className="max-w-2xl text-sm text-muted-foreground md:text-base">{featured.synopsis}</p>
+                <section className="px-3 sm:px-4 py-8 sm:py-12">
+                    <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl sm:rounded-3xl border bg-muted/30">
+
+                        {/* Mobile/tablet: poster banner */}
+                        {featured.posterUrl && (
+                            <div className="relative h-52 sm:h-64 w-full overflow-hidden lg:hidden">
+                                <Image
+                                    src={featured.posterUrl}
+                                    alt={featured.title}
+                                    fill
+                                    className="object-cover"
+                                    sizes="100vw"
+                                    priority
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
+                                <div className="absolute bottom-3 left-4">
+                                    <Badge className="gap-1.5 rounded-full px-2.5 py-0.5 text-xs">
+                                        <Sparkles className="size-3" /> Featured Spotlight
+                                    </Badge>
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-2 text-sm">
-                                <Badge variant="outline">{featured.mediaType}</Badge>
-                                <Badge variant="outline">{featured.releaseYear}</Badge>
-                                <Badge variant="outline">{featured.streamingPlatform}</Badge>
-                                <Badge variant={featured.pricingType === "PREMIUM" ? "default" : "secondary"}>{featured.pricingType}</Badge>
+                        )}
+
+                        <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[1.3fr_0.9fr] lg:p-8">
+                            {/* Text content */}
+                            <div className="space-y-4">
+                                {/* Only show badge on desktop — already shown in poster on mobile */}
+                                <Badge className="hidden lg:flex gap-2 rounded-full px-3 py-1 text-xs w-fit">
+                                    <Sparkles className="size-3.5" /> Featured Spotlight
+                                </Badge>
+                                <div className="space-y-2 sm:space-y-3">
+                                    <h2 className="text-2xl sm:text-3xl font-bold lg:text-4xl">{featured.title}</h2>
+                                    <p className="max-w-2xl text-sm text-muted-foreground sm:text-base line-clamp-3 sm:line-clamp-none">{featured.synopsis}</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2 text-sm">
+                                    <Badge variant="outline">{featured.mediaType}</Badge>
+                                    <Badge variant="outline">{featured.releaseYear}</Badge>
+                                    {featured.streamingPlatform && <Badge variant="outline">{featured.streamingPlatform}</Badge>}
+                                    <Badge variant={featured.pricingType === "PREMIUM" ? "default" : "secondary"}>{featured.pricingType}</Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    <Button asChild>
+                                        <Link href={`/media/${featured.id}`}>View details</Link>
+                                    </Button>
+                                    <Button variant="outline" asChild>
+                                        <Link href="/media?sortBy=createdAt&sortOrder=desc">Browse newly added</Link>
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-3">
-                                <Button asChild>
-                                    <Link href={`/media/${featured.id}`}>View details</Link>
-                                </Button>
-                                <Button variant="outline" asChild>
-                                    <Link href="/media?sortBy=createdAt&sortOrder=desc">Browse newly added</Link>
-                                </Button>
+
+                            {/* Desktop only: 4 editor-pick mini cards */}
+                            <div className="hidden lg:grid grid-cols-2 gap-3 rounded-2xl bg-background/80 p-4">
+                                {editorPicks.slice(0, 4).map((item) => (
+                                    <MediaCard key={item.id} media={item} />
+                                ))}
                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 rounded-2xl bg-background/80 p-4">
-                            {editorPicks.slice(0, 4).map((item) => (
-                                <MediaCard key={item.id} media={item} />
-                            ))}
                         </div>
                     </div>
                 </section>

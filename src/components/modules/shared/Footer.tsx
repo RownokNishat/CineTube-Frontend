@@ -29,7 +29,6 @@ export default function Footer() {
                         <li><Link href="/media?mediaType=SERIES" className="hover:text-white transition-colors">TV Series</Link></li>
                         <li><Link href="/pricing" className="hover:text-white transition-colors">Premium Plans</Link></li>
                         <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                        <li><Link href="/blog" className="hover:text-white transition-colors">Our Blog</Link></li>
                     </ul>
                 </div>
 
@@ -41,6 +40,7 @@ export default function Footer() {
                         <li><Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
                         <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                         <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                        <li><Link href="/return-policy" className="hover:text-white transition-colors">Return Policy</Link></li>
                     </ul>
                 </div>
 
@@ -50,15 +50,15 @@ export default function Footer() {
                     <ul className="space-y-3 text-sm">
                         <li className="flex items-start gap-2 text-gray-400">
                             <MapPin className="size-4 shrink-0 mt-0.5" />
-                            <span>123 Entertainment Blvd, Suite 400<br/>Hollywood, CA 90028</span>
+                            <span>1207 - Mohammodpur<br/>Dhaka, Bangladesh</span>
                         </li>
                         <li className="flex items-center gap-2 text-gray-400">
                             <Phone className="size-4 shrink-0" />
-                            <span>+1 (800) 123-4567</span>
+                            <a href="tel:01722310450" className="hover:text-white transition-colors">01722310450</a>
                         </li>
                         <li className="flex items-center gap-2 text-gray-400">
                             <Mail className="size-4 shrink-0" />
-                            <span>support@cinetube.com</span>
+                            <a href="mailto:rownoknishat17@gmail.com" className="hover:text-white transition-colors">rownoknishat17@gmail.com</a>
                         </li>
                     </ul>
                 </div>
